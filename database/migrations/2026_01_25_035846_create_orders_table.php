@@ -16,6 +16,7 @@ return new class extends Migration
     $table->foreignId('user_id')->constrained()->cascadeOnDelete(); // kasir
     $table->integer('total');
     $table->enum('payment_method', ['cash', 'qris']);
+    $table->boolean('with_receipt')->default(true);
     $table->timestamps();
 });
 

@@ -29,7 +29,7 @@
             {{-- User Management --}}
             <a href="{{ route('admin.users.index') }}"
                 class="flex items-center gap-3 px-3 py-2 rounded
-                   {{ request()->routeIs('admin.users.*') ? 'bg-primary text-white' : 'hover:bg-gray-100 text-gray-700' }}">
+                       {{ request()->routeIs('admin.users.*') ? 'bg-primary text-white' : 'hover:bg-gray-100 text-gray-700' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                         d="M17 20h5v-2a4 4 0 00-4-4h-1M9 20H4v-2a4 4 0 014-4h1m6-4a4 4 0 11-8 0 4 4 0 018 0zm6 4a3 3 0 10-6 0" />
@@ -40,7 +40,7 @@
 
             {{-- Daftar Menu --}}
             <a href="{{ route('menu.index') }}" class="flex items-center gap-3 px-3 py-2 rounded
-                   {{ request()->routeIs('menu.*') ? 'bg-primary text-white' : 'hover:bg-gray-100 text-gray-700' }}">
+                       {{ request()->routeIs('menu.*') ? 'bg-primary text-white' : 'hover:bg-gray-100 text-gray-700' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                         d="M20 13V7a2 2 0 00-2-2H6a2 2 0 00-2 2v6m16 0l-8 5-8-5" />
@@ -50,7 +50,7 @@
 
             {{-- Jadwal Shift --}}
             <a href="{{ route('shift.index') }}" class="flex items-center gap-3 px-3 py-2 rounded
-                   {{ request()->routeIs('shift.*') ? 'bg-primary text-white' : 'hover:bg-gray-100 text-gray-700' }}">
+                       {{ request()->routeIs('shift.*') ? 'bg-primary text-white' : 'hover:bg-gray-100 text-gray-700' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                         d="M8 7V3m8 4V3M3 11h18M5 21h14a2 2 0 002-2v-8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -60,15 +60,38 @@
 
         @endif
         @if(auth()->user()->role === 'kasir')
-            {{-- Kasir --}}
-            <a href="{{ route('kasir.index') }}" class="flex items-center gap-3 px-3 py-2 rounded
-                {{ request()->routeIs('kasir.*') ? 'bg-primary text-white' : 'hover:bg-gray-100 text-gray-700' }}">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                </svg>
-                <span x-show="sidebarOpen" x-transition>Kasir</span>
-            </a>
+
+                    {{-- Menu Kasir --}}
+                    <a href="{{ route('kasir.index') }}" class="flex items-center gap-3 px-3 py-2 rounded
+            {{ request()->routeIs('kasir.index') ? 'bg-primary text-white' : 'hover:bg-gray-100 text-gray-700' }}">
+
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                        </svg>
+
+                        <span x-show="sidebarOpen" x-transition>
+                            Kasir
+                        </span>
+
+                    </a>
+
+
+
+                    {{-- Menu Riwayat Transaksi --}}
+                    <a href="{{ route('kasir.riwayat') }}" class="flex items-center gap-3 px-3 py-2 rounded
+            {{ request()->routeIs('kasir.riwayat') ? 'bg-primary text-white' : 'hover:bg-gray-100 text-gray-700' }}">
+
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 8v4l3 3M5 3v4h4M19 3v4h-4M5 21v-4h4M19 21v-4h-4" />
+                        </svg>
+
+                        <span x-show="sidebarOpen" x-transition>
+                            Riwayat Transaksi
+                        </span>
+
+                    </a>
 
         @endif
     </nav>

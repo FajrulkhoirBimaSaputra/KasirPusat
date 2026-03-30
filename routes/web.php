@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\MenuManagementController;
 use App\Http\Controllers\Admin\ShiftController;
 use App\Http\Controllers\KasirController;
+use App\Http\Controllers\TransaksiController;
 
 Route::get('/', function () {
     return view('auth.login');
@@ -37,7 +38,12 @@ Route::middleware('auth')->group(function () {
 
     // KASIR
     Route::get('/kasir', [KasirController::class, 'index'])->name('kasir.index');
+    Route::get('/kasir/riwayat', [KasirController::class, 'riwayat'])->name('kasir.riwayat');
     Route::post('/kasir', [KasirController::class, 'store'])->name('kasir.store');
+    Route::get('/kasir/struk/{order}', [KasirController::class, 'struk'])
+    ->name('kasir.struk');
+    
+    
 });
 
 
