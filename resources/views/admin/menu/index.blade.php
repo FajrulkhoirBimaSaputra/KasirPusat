@@ -22,16 +22,15 @@
                 <table class="w-full text-left">
                     <thead>
                         <tr class="bg-accent/10 border-b border-accent/20 text-dark text-xs uppercase tracking-wider font-bold">
-                            <th class="px-6 py-4 text-center w-16">#</th>
                             <th class="px-6 py-4">Produk</th>
                             <th class="px-6 py-4">Kategori</th>
+                            <th class="px-6 py-4">Harga</th>
                             <th class="px-6 py-4 text-right">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-accent/10">
                         @forelse($menus as $menu)
                         <tr class="hover:bg-accent/5 transition-colors group">
-                            <td class="px-6 py-4 text-center text-dark/60 font-medium">{{ $loop->iteration }}</td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-4">
                                     <img src="{{ $menu->image_path ? asset('storage/'.$menu->image_path) : 'https://ui-avatars.com/api/?name='.$menu->nama }}" 
@@ -42,6 +41,11 @@
                             <td class="px-6 py-4">
                                 <span class="bg-dark text-accent px-3 py-1 rounded-full text-[10px] font-bold uppercase">
                                     {{ $menu->jenis }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="bg-dark text-accent px-3 py-1 rounded-full text-[10px] font-bold uppercase">
+                                    {{ $menu->harga }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-right">

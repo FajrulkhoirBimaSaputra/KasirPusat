@@ -32,6 +32,27 @@
         <form method="POST" action="{{ route('shift.store') }}">
             @csrf
 
+            {{-- PEMETAAN WARNA KASIR --}}
+            @php
+                $colorPalettes = [
+                    ['bg' => 'bg-blue-200',   'badge' => 'bg-blue-600',   'text' => 'text-white'],
+                    ['bg' => 'bg-green-200',  'badge' => 'bg-green-600',  'text' => 'text-white'],
+                    ['bg' => 'bg-yellow-200', 'badge' => 'bg-yellow-500', 'text' => 'text-gray-900'],
+                    ['bg' => 'bg-purple-200', 'badge' => 'bg-purple-600', 'text' => 'text-white'],
+                    ['bg' => 'bg-pink-200',   'badge' => 'bg-pink-600',   'text' => 'text-white'],
+                    ['bg' => 'bg-orange-200', 'badge' => 'bg-orange-600', 'text' => 'text-white'],
+                    ['bg' => 'bg-teal-200',   'badge' => 'bg-teal-600',   'text' => 'text-white'],
+                    ['bg' => 'bg-indigo-200', 'badge' => 'bg-indigo-600', 'text' => 'text-white'],
+                ];
+
+                $userColors = [];
+                $colorIndex = 0;
+                foreach($kasirs as $kasir) {
+                    $userColors[$kasir->id] = $colorPalettes[$colorIndex % count($colorPalettes)];
+                    $colorIndex++;
+                }
+            @endphp
+
             {{-- PILIH KASIR --}}
             <div class="max-w-xs mb-4">
                 <label class="text-sm font-semibold mb-1 block">
@@ -65,17 +86,42 @@
                             $tanggal = $day->format('Y-m-d');
                             $shift = $shifts[$tanggal] ?? null;
                             $inMonth = $day->month === $date->month;
-                            $isToday = $day->isToday();
-                            $isPast = $day->isPast() && !$isToday;
+                            
+                            // Menggunakan perbandingan string format Y-m-d agar lebih akurat (tidak terpengaruh jam)
+                            $isToday = $tanggal === now()->format('Y-m-d');
+                            $isPast = $tanggal < now()->format('Y-m-d');
+
+                            // Warna Background Default
+                            $cellBg = $inMonth ? 'bg-white' : 'bg-gray-50 text-gray-300';
+                            $badgeBg = '';
+                            $badgeText = '';
+                            
+                            if ($shift) {
+                                $shiftColor = $userColors[$shift->user->id] ?? ['bg' => 'bg-red-200', 'badge' => 'bg-red-500', 'text' => 'text-white'];
+                                $cellBg = $shiftColor['bg'];
+                                $badgeBg = $shiftColor['badge'];
+                                $badgeText = $shiftColor['text'];
+                            }
+
+                            // Modifikasi jika hari sudah lewat (Past Day)
+                            $pastClasses = '';
+                            if ($isPast) {
+                                // Buat transparan dan matikan event klik
+                                $pastClasses = 'opacity-60 pointer-events-none disabled-cell ';
+                                
+                                if (!$shift) {
+                                    $cellBg = 'bg-gray-200'; // Abu-abu gelap jika kosong
+                                } else {
+                                    $pastClasses .= 'grayscale'; // Jadikan warna shift menjadi abu-abu jika sudah lewat
+                                }
+                            }
                         @endphp
 
                         <div 
                             data-date="{{ $tanggal }}"
-                            class="calendar-cell h-32 border relative
-                            {{ !$inMonth ? 'bg-gray-100 text-gray-400' : 'bg-white' }}
-                            {{ $shift ? 'bg-red-200' : '' }}
-                            {{ $isToday ? 'ring-2 ring-blue-500 bg-blue-50' : '' }}
-                            {{ $isPast ? 'bg-gray-200 text-gray-400 pointer-events-none cursor-not-allowed' : 'cursor-pointer' }}"
+                            class="calendar-cell h-32 border relative transition {{ $cellBg }} {{ $pastClasses }}
+                            {{ $isToday ? 'ring-2 ring-blue-500 z-10' : '' }}
+                            {{ !$isPast && $inMonth ? 'cursor-pointer hover:brightness-95' : '' }}"
                         >
 
                             <span class="absolute top-2 right-2 text-sm font-semibold">
@@ -83,7 +129,7 @@
                             </span>
 
                             @if($shift)
-                                <div class="absolute bottom-2 left-2 right-2 text-xs bg-red-500 text-white rounded px-2 py-1">
+                                <div class="absolute bottom-2 left-2 right-2 text-xs {{ $badgeBg }} {{ $badgeText }} font-medium rounded px-2 py-1 text-center truncate">
                                     {{ $shift->user->name }}
                                 </div>
                             @endif
@@ -99,7 +145,7 @@
 
             <div class="mt-6 flex justify-end">
                 <button onclick="submitShift(event)"
-                    class="px-8 py-3 bg-blue-600 text-white rounded-xl font-bold">
+                    class="px-8 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition">
                     Simpan Jadwal Shift
                 </button>
             </div>
@@ -122,20 +168,17 @@
 
             cell.addEventListener('click', () => {
 
-                if(cell.classList.contains('pointer-events-none')) return;
+                // Mencegah klik pada hari yang sudah lewat
+                if(cell.classList.contains('disabled-cell')) return;
 
                 const date = cell.dataset.date;
 
                 if (selectedDates.has(date)) {
-
                     cell.classList.remove('selected');
                     selectedDates.delete(date);
-
                 } else {
-
                     cell.classList.add('selected');
                     selectedDates.add(date);
-
                 }
 
             });
@@ -143,13 +186,11 @@
         });
 
         function submitShift(e) {
-
             e.preventDefault();
-
             const kasir = document.getElementById('kasir').value;
 
             if (!kasir || selectedDates.size === 0) {
-                alert('Pilih kasir dan tanggal');
+                alert('Pilih kasir dan tanggal terlebih dahulu');
                 return;
             }
 
@@ -157,18 +198,14 @@
             box.innerHTML = '';
 
             selectedDates.forEach(date => {
-
                 const input = document.createElement('input');
                 input.type = 'hidden';
                 input.name = `shifts[${date}]`;
                 input.value = kasir;
-
                 box.appendChild(input);
-
             });
 
             e.target.closest('form').submit();
-
         }
 
         {{-- ALERT HILANG OTOMATIS --}}
@@ -180,5 +217,4 @@
         }, 3000);
 
     </script>
-
 </x-app-layout>

@@ -53,10 +53,10 @@
 
     <div class="center">
 
-        <b>KEDAI BIMZ</b><br>
-        Jl. Contoh No 123<br>
-        Palangkaraya<br>
-        Telp: 08123456789
+        <b>TOKO KOPI PUSAT</b><br>
+        Nilasari<br>
+        Gonilan, Kartasura, Sukoharjo, Jawa Tengah 57169<br>
+    
 
     </div>
 
@@ -135,7 +135,7 @@
     <div class="center">
 
         Terima Kasih<br>
-        Selamat Menikmati
+        Silakan datang kembali
 
     </div>
 
