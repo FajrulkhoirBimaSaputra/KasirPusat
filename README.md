@@ -22,8 +22,6 @@ git pull origin main
 Untuk memastikan semua *package* (PHP & Node.js) sudah yang paling baru sesuai kode yang di-pull:
 
 ```bash
-composer install
-npm install
 npm run build
 
 ```
