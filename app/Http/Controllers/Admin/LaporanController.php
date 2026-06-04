@@ -8,6 +8,8 @@ use App\Models\Order;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Models\OrderItem;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\LaporanBulananExport;
 
 class LaporanController extends Controller
 {
@@ -80,5 +82,13 @@ class LaporanController extends Controller
             'daftarTahun',
             'produkPerBulan'
         ));
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $tahun = $request->query('tahun', Carbon::now()->year);
+        $namaFile = 'Laporan_Penjualan_' . $tahun . '.xlsx';
+
+        return Excel::download(new LaporanBulananExport($tahun), $namaFile);
     }
 }

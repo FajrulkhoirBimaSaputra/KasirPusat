@@ -36,6 +36,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/shift', [ShiftController::class, 'index'])->name('shift.index');
         Route::post('/shift', [ShiftController::class, 'store'])->name('shift.store');
         Route::get('/admin/laporan/bulanan', [LaporanController::class, 'bulanan'])->name('laporan.bulanan');
+        Route::get('/admin/laporan/bulanan/export', [LaporanController::class, 'exportExcel'])->name('laporan.bulanan.export');
         Route::resource('admin/stok', IngredientController::class)->names('admin.stok');
     });
 

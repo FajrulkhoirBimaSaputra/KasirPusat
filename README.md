@@ -4,7 +4,7 @@ Silakan *copy* seluruh isi kotak di bawah ini dan *paste* ke dalam file `README.
 # 🛒 Sistem Manajemen Kasir & POS
 
 Aplikasi Point of Sales (POS) berbasis Laravel untuk mengelola transaksi kasir, manajemen kas (shift), laporan keuangan analitik, dan pelacakan stok bahan baku secara real-time.
-
+```
 ---
 
 ## 🚀 Panduan Pembaruan & Setup Database

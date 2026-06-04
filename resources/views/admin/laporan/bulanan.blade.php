@@ -28,23 +28,37 @@
                     <h3 class="text-xl font-bold text-gray-900 mb-1">Rekapitulasi Kinerja Bisnis</h3>
                     <p class="text-sm text-gray-500">Total pendapatan di tahun <b>{{ $tahunTerpilih }}</b> mencapai
                         <span class="text-primary font-bold text-base">Rp
-                            {{ number_format($totalTahunan, 0, ',', '.') }}</span></p>
+                            {{ number_format($totalTahunan, 0, ',', '.') }}</span>
+                    </p>
                 </div>
 
-                <form action="{{ route('laporan.bulanan') }}" method="GET"
-                    class="flex items-center gap-3 bg-white border border-gray-200 rounded-xl px-5 py-3 shadow-sm w-full md:w-auto">
-                    <span class="text-sm font-bold text-gray-400 uppercase tracking-wider">Tahun Laporan</span>
-                    <div class="relative w-full md:w-32 border-l border-gray-200 pl-3">
-                        <select name="tahun" onchange="this.form.submit()"
-                            class="block w-full py-1 text-base font-black text-gray-900 bg-transparent border-none focus:ring-0 appearance-none cursor-pointer p-0">
-                            @foreach ($daftarTahun as $t)
-                                <option value="{{ $t }}" {{ $tahunTerpilih == $t ? 'selected' : '' }}>
-                                    {{ $t }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                </form>
+                <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+                    <form action="{{ route('laporan.bulanan') }}" method="GET"
+                        class="flex items-center gap-3 bg-white border border-gray-200 rounded-xl px-5 py-3 shadow-sm w-full md:w-auto">
+                        <span class="text-sm font-bold text-gray-400 uppercase tracking-wider">Tahun Laporan</span>
+                        <div class="relative w-full md:w-32 border-l border-gray-200 pl-3">
+                            <select name="tahun" onchange="this.form.submit()"
+                                class="block w-full py-1 text-base font-black text-gray-900 bg-transparent border-none focus:ring-0 appearance-none cursor-pointer p-0">
+                                @foreach ($daftarTahun as $t)
+                                    <option value="{{ $t }}" {{ $tahunTerpilih == $t ? 'selected' : '' }}>
+                                        {{ $t }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </form>
+
+                    <a href="{{ route('laporan.bulanan.export', ['tahun' => $tahunTerpilih]) }}"
+                        class="flex items-center justify-center gap-2 bg-[#107c41] hover:bg-[#185c37] text-white text-sm font-bold py-3.5 px-5 rounded-xl shadow-sm transition-all w-full md:w-auto transform hover:-translate-y-0.5">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Export Excel
+                    </a>
+                </div>
             </div>
+
+
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
@@ -205,7 +219,8 @@
                                                 <p
                                                     class="text-[11px] text-gray-500 font-medium uppercase tracking-wider mt-0.5">
                                                     <span class="font-bold text-gray-700" x-text="item.qty"></span>
-                                                    porsi</p>
+                                                    porsi
+                                                </p>
                                             </div>
                                         </div>
                                         <div
