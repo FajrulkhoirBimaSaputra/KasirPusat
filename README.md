@@ -1,5 +1,3 @@
-Silakan *copy* seluruh isi kotak di bawah ini dan *paste* ke dalam file `README.md` Anda:
-
 ```markdown
 # 🛒 Sistem Manajemen Kasir & POS
 
@@ -24,8 +22,6 @@ git pull origin main
 Untuk memastikan semua *package* (PHP & Node.js) sudah yang paling baru sesuai kode yang di-pull:
 
 ```bash
-composer install
-npm install
 npm run build
 
 ```
