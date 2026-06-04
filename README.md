@@ -1,32 +1,27 @@
-Berikut adalah _template_ `README.md` yang ringkas, rapi, dan _to-the-point_ sesuai dengan alur kerja (pull -> refresh database -> seed admin) yang kamu minta.
+Silakan *copy* seluruh isi kotak di bawah ini dan *paste* ke dalam file `README.md` Anda:
 
-Kamu tinggal _copy_ kode di bawah ini dan _paste_ ke dalam file `README.md` di _root_ direktori proyek Laravel kamu:
-
-````markdown
+```markdown
 # 🛒 Sistem Manajemen Kasir & POS
 
-Aplikasi Point of Sales (POS) berbasis Laravel untuk mengelola transaksi kasir, manajemen kas (shift), laporan keuangan analitik, dan pelacakan stok bahan baku secara _real-time_.
+Aplikasi Point of Sales (POS) berbasis Laravel untuk mengelola transaksi kasir, manajemen kas (shift), laporan keuangan analitik, dan pelacakan stok bahan baku secara real-time.
 
 ---
 
 ## 🚀 Panduan Pembaruan & Setup Database
 
-Jika Anda baru saja melakukan _clone_ atau ingin mengambil pembaruan kode terbaru dari GitHub dan mereset sistem ke kondisi awal, ikuti langkah-langkah berikut:
+Jika Anda baru saja melakukan *clone* atau ingin mengambil pembaruan kode terbaru dari GitHub dan mereset sistem ke kondisi awal, ikuti 3 langkah mudah berikut:
 
-### 1. Ambil Kode Terbaru dari GitHub (Pull)
-
-Buka terminal di dalam folder proyek, pastikan Anda berada di _branch_ yang benar, lalu tarik pembaruan terbaru:
-
+### 1. Ambil Kode Terbaru (Pull) dari GitHub
+Buka terminal di dalam folder proyek Anda, lalu jalankan perintah ini untuk menarik kode terbaru:
 ```bash
 git pull origin main
+
 ```
-````
+---
 
-_(Catatan: Ubah `main` menjadi `master` jika repositori Anda menggunakan master sebagai branch utama)._
+### 2. Update Dependensi (Jika Diperlukan)
 
-### 2. Update Dependensi (Opsional namun Disarankan)
-
-Jika ada penambahan _package_ baru pada pembaruan tersebut, jalankan perintah ini:
+Untuk memastikan semua *package* (PHP & Node.js) sudah yang paling baru sesuai kode yang di-pull:
 
 ```bash
 composer install
@@ -35,30 +30,22 @@ npm run build
 
 ```
 
-### 3. Refresh Database (Migrate:Fresh)
+### 3. Refresh Database & Buat Akun Admin (Seeder)
 
-**⚠️ PERINGATAN:** Perintah ini akan **MENGHAPUS (DROP)** seluruh tabel dan data lama di database, lalu membuat ulang struktur tabelnya dari awal. Pastikan Anda tidak melakukan ini di database _Production_ yang datanya masih terpakai!
+**⚠️ PERINGATAN:** Perintah ini akan **MENGHAPUS (DROP)** seluruh tabel beserta data lama di database Anda, lalu membangunnya ulang dari awal.
 
-```bash
-php artisan migrate:fresh
-
-```
-
-### 4. Jalankan Seeder Akun Admin
-
-Setelah database kosong dan struktur tabel baru terbentuk, jalankan _seeder_ untuk membuat akun Admin standar agar Anda bisa _login_ ke dalam sistem.
-
-Jalankan perintah berikut (jika Anda memisahkan seeder admin):
-
-```bash
-php artisan db:seed --class=AdminSeeder
-
-```
-
-_(Atau, jika seeder admin sudah dimasukkan ke dalam pemanggilan `DatabaseSeeder.php` utama, Anda cukup menggunakan jalan pintas ini untuk langkah 3 dan 4 sekaligus):_
+Jalankan satu baris perintah ini untuk melakukan migrasi ulang sekaligus menjalankan *seeder* otomatis (membuat akun Admin):
 
 ```bash
 php artisan migrate:fresh --seed
+
+```
+
+*(Alternatif: Jika Anda memisahkan file seeder khusus Admin, jalankan ini secara berurutan):*
+
+```bash
+php artisan migrate:fresh
+php artisan db:seed --class=AdminSeeder
 
 ```
 
@@ -66,19 +53,19 @@ php artisan migrate:fresh --seed
 
 ## 🔐 Kredensial Login Default
 
-Setelah _seeder_ berhasil dijalankan, Anda dapat masuk ke dasbor menggunakan akun berikut:
+Setelah perintah di langkah ke-3 berhasil, database sudah memiliki akun pusat. Anda dapat langsung masuk ke sistem menggunakan:
 
-- **Role:** Admin Pusat
-- **Email:** `admin@admin.com` _(Sesuaikan dengan konfigurasi file seeder Anda)_
-- **Password:** `password`
+* **Role:** Admin Pusat
+* **Email:** `admin@admin.com`
+* **Password:** `password`
 
 ---
 
-**💡 Catatan Tambahan:**
-Pastikan file `.env` Anda sudah terkonfigurasi dengan benar (terutama bagian `DB_DATABASE`, `DB_USERNAME`, dan `DB_PASSWORD`) sebelum menjalankan perintah _migrate_. Jika file `.env` belum ada, _copy_ dari `.env.example` lalu jalankan `php artisan key:generate`.
+**💡 Troubleshooting:**
+
+* Jika terjadi *error* pada database, pastikan file `.env` sudah terkonfigurasi dengan benar (`DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`).
+* Jika file `.env` belum ada, silakan *copy* dari `.env.example`, lalu jalankan perintah `php artisan key:generate` sebelum melakukan *migrate*.
 
 ```
-
-*Template* ini sudah sangat standar dan profesional untuk dibaca oleh *developer* lain (atau untuk pengingat dirimu sendiri di masa depan) saat ingin menjalankan aplikasi ini di komputer/server baru!
 
 ```
