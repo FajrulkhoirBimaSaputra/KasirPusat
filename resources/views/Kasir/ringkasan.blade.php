@@ -1,120 +1,241 @@
 <x-app-layout>
-    <div class="p-4 sm:p-6 flex justify-center bg-gray-100 min-h-screen">
-        
-        {{-- Kontainer Utama (Meniru Layar Tablet) --}}
-        <div class="w-full max-w-2xl bg-white shadow-xl rounded-lg overflow-hidden border border-gray-200">
-            
-            {{-- Header Hijau --}}
-            <div class="bg-primary text-white p-4 flex justify-between items-center">
-                <div class="flex items-center gap-3">
-                    <a href="{{ route('kasir.riwayat') }}" class="hover:text-gray-200">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
-                    </a>
-                    <h1 class="text-xl font-medium">Shift</h1>
-                </div>
-                <div class="flex items-center gap-4">
-                    <svg class="w-6 h-6 cursor-pointer hover:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    <svg class="w-6 h-6 cursor-pointer hover:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+    <x-slot name="header">
+        <div class="flex items-center gap-2">
+            <a href="{{ route('kasir.riwayat') }}"
+                class="p-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+            </a>
+            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <h2 class="font-bold text-xl text-gray-800 leading-tight">
+                Laporan Akhir Shift
+            </h2>
+        </div>
+    </x-slot>
+
+    <div class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+
+        {{-- TOMBOL AKSI ATAS --}}
+        <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
+            <div class="w-full sm:w-auto flex flex-col">
+                <p class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-0.5">Shift Aktif</p>
+                <div class="flex items-center gap-2 text-gray-800 font-bold">
+                    <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    {{ Auth::user()->name }}
+                    <span class="text-gray-300">|</span>
+
+                    <span class="text-gray-500 font-medium">Buka: {{ $waktuBukaShift->format('d M Y • H:i') }}
+                        WIB</span>
                 </div>
             </div>
 
-            {{-- Tombol Aksi --}}
-            <div class="p-4 flex gap-4 border-b">
-                <a href="{{ route('kasir.manajemen-kas') }}" class="flex-1 text-center py-2 text-primary border border-primary rounded font-medium hover:bg-green-50 transition block">
-                    MANAJEMEN KAS
+            <div class="w-full sm:w-auto flex gap-3">
+                <a href="{{ route('kasir.manajemen-kas') }}"
+                    class="flex-1 sm:flex-none inline-flex justify-center items-center gap-2 px-5 py-2.5 bg-white border-2 border-gray-200 hover:border-primary hover:text-primary text-gray-700 rounded-xl font-bold text-sm transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    Manajemen Kas
                 </a>
-                <button class="flex-1 py-2 text-primary border border-primary rounded font-medium hover:bg-green-50 transition">
-                    TUTUP SHIFT
+                {{-- Form Rahasia untuk Tutup Shift --}}
+                <form id="form-tutup-shift" action="{{ route('kasir.tutup-shift') }}" method="POST" class="hidden">
+                    @csrf
+                    {{-- Mengirimkan data total uang laci agar tercatat di database saat ditarik --}}
+                    <input type="hidden" name="expected_cash" value="{{ $jumlahTunaiDiharapkan }}">
+                </form>
+
+                <button type="button" onclick="prosesTutupShift()"
+                    class="flex-1 sm:flex-none inline-flex justify-center items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-xl font-bold text-sm shadow-sm transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                    </svg>
+                    Cetak & Tutup Shift
                 </button>
+
+                {{-- Script Print & Auto-Submit --}}
+                <script>
+                    function prosesTutupShift() {
+                        if (confirm(
+                                'PERINGATAN: Apakah Anda yakin ingin menutup shift sekarang? Akses menu kasir akan dikunci setelah ini.'
+                                )) {
+                            // 1. Munculkan jendela Print (Struk/Laporan)
+                            window.print();
+
+                            // 2. Beri jeda 1 detik agar print dialog muncul, lalu submit form untuk mengunci shift
+                            setTimeout(() => {
+                                document.getElementById('form-tutup-shift').submit();
+                            }, 1000);
+                        }
+                    }
+                </script>
             </div>
+        </div>
 
-            {{-- Info Shift --}}
-            <div class="p-4 border-b text-gray-700 text-sm space-y-3">
-                <div class="flex justify-between">
-                    <span>Nomor shift: {{ now()->format('d') }}</span>
-                </div>
-                <div class="flex justify-between">
-                    <span>Shift dibuka: {{ Auth::user()->name }}</span>
-                    <span>{{ now()->format('d/m/y H.i') }}</span>
-                </div>
-            </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-            {{-- Bagian Laci Uang --}}
-            <div class="p-4 border-b">
-                <h3 class="text-primary font-medium mb-3">Laci uang</h3>
-                
-                <div class="space-y-2 text-sm text-gray-600">
-                    <div class="flex justify-between">
-                        <span>Modal awal</span>
-                        <span>Rp{{ number_format($modalAwal, 0, ',', '.') }}</span>
+            {{-- KIRI: KONTROL LACI UANG (CASH DRAWER) --}}
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
+                <div class="p-5 border-b border-gray-100 bg-gray-50 flex items-center gap-3">
+                    <div
+                        class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
                     </div>
-                    <div class="flex justify-between">
-                        <span>Pembayaran tunai</span>
-                        <span>Rp{{ number_format($tunai, 0, ',', '.') }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Uang yang dikembalikan</span>
-                        <span>Rp{{ number_format($uangDikembalikan, 0, ',', '.') }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Pemasukan</span>
-                        <span>Rp{{ number_format($pemasukan, 0, ',', '.') }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Pengeluaran</span>
-                        <span>Rp{{ number_format($pengeluaran, 0, ',', '.') }}</span>
-                    </div>
+                    <h3 class="text-lg font-bold text-gray-800">Kontrol Laci Uang</h3>
                 </div>
 
-                <div class="mt-4 pt-3 border-t flex justify-between font-bold text-gray-800">
-                    <span>Jumlah uang tunai yang diharapkan</span>
-                    <span>Rp{{ number_format($jumlahTunaiDiharapkan, 0, ',', '.') }}</span>
-                </div>
-            </div>
-
-            {{-- Bagian Ringkasan Penjualan --}}
-            <div class="p-4">
-                <h3 class="text-primary font-medium mb-3">Ringkasan penjualan</h3>
-                
-                <div class="space-y-2 text-sm text-gray-600">
-                    {{-- TAMBAHAN: Total Transaksi --}}
-                    <div class="flex justify-between font-bold text-gray-800 border-b pb-2 mb-2">
-                        <span>Total Transaksi Hari Ini</span>
-                        <span>{{ $totalTransaksiHariIni }}</span>
-                    </div>
-
-                    <div class="flex justify-between">
-                        <span>Penjualan Kotor</span>
-                        <span>Rp{{ number_format($penjualanKotor, 0, ',', '.') }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Pengembalian</span>
-                        <span>Rp0</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Diskon</span>
-                        <span>Rp0</span>
-                    </div>
-                    
-                    <div class="pt-2 mt-2">
-                        <div class="flex justify-between font-bold text-gray-800 mb-2">
-                            <span>Penjualan bersih</span>
-                            <span>Rp{{ number_format($penjualanBersih, 0, ',', '.') }}</span>
+                <div class="p-5 flex-1 flex flex-col justify-between">
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="font-semibold text-gray-500">Modal Awal</span>
+                            <span class="font-bold text-gray-800">Rp {{ number_format($modalAwal, 0, ',', '.') }}</span>
                         </div>
-                        <div class="flex justify-between ml-4">
-                            <span>Tunai</span>
-                            <span>Rp{{ number_format($tunai, 0, ',', '.') }}</span>
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="font-semibold text-gray-500">Pembayaran Tunai (Masuk)</span>
+                            <span class="font-bold text-emerald-600">+ Rp
+                                {{ number_format($tunai, 0, ',', '.') }}</span>
                         </div>
-                        <div class="flex justify-between ml-4 mt-2">
-                            <span>Qris</span>
-                            <span>Rp{{ number_format($qris, 0, ',', '.') }}</span>
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="font-semibold text-gray-500">Kas Pemasukan Tambahan</span>
+                            <span class="font-bold text-emerald-600">+ Rp
+                                {{ number_format($pemasukan, 0, ',', '.') }}</span>
+                        </div>
+                        <hr class="border-gray-100 border-dashed">
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="font-semibold text-gray-500">Refund Pesanan (Keluar)</span>
+                            <span class="font-bold text-amber-500">- Rp
+                                {{ number_format($uangDikembalikan, 0, ',', '.') }}</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="font-semibold text-gray-500">Kas Pengeluaran Keluar</span>
+                            <span class="font-bold text-red-500">- Rp
+                                {{ number_format($pengeluaran, 0, ',', '.') }}</span>
                         </div>
                     </div>
+
+                    <div class="mt-8 p-4 bg-primary/10 border border-primary/20 rounded-xl text-center">
+                        <p class="text-xs font-bold text-primary uppercase tracking-wider mb-1">Uang Fisik Diharapkan di
+                            Laci</p>
+                        <p class="text-3xl font-black text-primary leading-tight">Rp
+                            {{ number_format($jumlahTunaiDiharapkan, 0, ',', '.') }}</p>
+                    </div>
+                </div>
+            </div>
+
+            {{-- KANAN: RINGKASAN PENJUALAN --}}
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
+                <div class="p-5 border-b border-gray-100 bg-gray-50 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-800">Ringkasan Penjualan</h3>
+                </div>
+
+                <div class="p-5 flex-1 flex flex-col">
+
+                    {{-- Box Jumlah Transaksi --}}
+                    <div
+                        class="flex justify-between items-center bg-gray-50 p-4 rounded-xl border border-gray-200 mb-6">
+                        <div>
+                            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-0.5">Total Transaksi
+                            </p>
+                            <p class="text-sm font-medium text-gray-400">Jumlah struk hari ini</p>
+                        </div>
+                        <p class="text-2xl font-black text-gray-800">{{ $totalTransaksiHariIni }}</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="font-semibold text-gray-500">Penjualan Kotor</span>
+                            <span class="font-bold text-gray-800">Rp
+                                {{ number_format($penjualanKotor, 0, ',', '.') }}</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="font-semibold text-gray-500">Diskon Produk</span>
+                            <span class="font-bold text-gray-800">Rp 0</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="font-semibold text-gray-500">Refund / Pengembalian</span>
+                            <span class="font-bold text-amber-500">- Rp
+                                {{ number_format($uangDikembalikan, 0, ',', '.') }}</span>
+                        </div>
+
+                        <div class="pt-4 border-t border-gray-100 mt-2">
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="font-bold text-gray-800 text-base">Penjualan Bersih</span>
+                                <span class="font-black text-gray-900 text-lg">Rp
+                                    {{ number_format($penjualanBersih, 0, ',', '.') }}</span>
+                            </div>
+
+                            {{-- Rincian Metode --}}
+                            <div class="pl-4 border-l-2 border-gray-200 space-y-2">
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="font-semibold text-gray-500 flex items-center gap-1.5">
+                                        <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> Tunai (Cash)
+                                    </span>
+                                    <span class="font-bold text-gray-700">Rp
+                                        {{ number_format($tunai, 0, ',', '.') }}</span>
+                                </div>
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="font-semibold text-gray-500 flex items-center gap-1.5">
+                                        <div class="w-1.5 h-1.5 rounded-full bg-blue-500"></div> QRIS (Midtrans)
+                                    </span>
+                                    <span class="font-bold text-gray-700">Rp
+                                        {{ number_format($qris, 0, ',', '.') }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
         </div>
+
     </div>
+
+    <style>
+        @media print {
+            body {
+                background-color: white !important;
+            }
+
+            header,
+            nav,
+            button,
+            a {
+                display: none !important;
+            }
+
+            .max-w-4xl {
+                max-width: 100% !important;
+                padding: 0 !important;
+            }
+
+            .grid {
+                display: block !important;
+            }
+
+            .bg-white {
+                box-shadow: none !important;
+                border: 1px solid #e5e7eb !important;
+                margin-bottom: 20px !important;
+            }
+        }
+    </style>
 </x-app-layout>

@@ -1,43 +1,106 @@
 <x-app-layout>
-    <div class="max-w-7xl mx-auto p-2 sm:p-4 md:p-6">
+    <x-slot name="header">
+        <div class="flex items-center gap-2">
+            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            <h2 class="font-bold text-xl text-gray-800 leading-tight">
+                Mesin Kasir (POS)
+            </h2>
+        </div>
+    </x-slot>
+
+    <script type="text/javascript" src="https://app.sandbox.midtrans.com/snap/snap.js"
+        data-client-key="{{ env('MIDTRANS_CLIENT_KEY') }}"></script>
+
+    <div class="max-w-7xl mx-auto p-2 sm:p-4 md:p-6" x-data="{ activeCategory: 'semua' }">
+
+        {{-- ALERT SUCCESS --}}
+        @if (session('success'))
+            <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)" x-transition.duration.500ms
+                class="mb-6 flex items-center p-4 text-emerald-800 rounded-xl bg-emerald-50 border border-emerald-200 shadow-sm"
+                role="alert">
+                <svg class="flex-shrink-0 w-5 h-5 mr-3 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                        clip-rule="evenodd" />
+                </svg>
+                <div class="text-sm font-medium">
+                    {{ session('success') }}
+                </div>
+            </div>
+        @endif
+
+        {{-- IFRAME AUTO-PRINT STRUK --}}
+        @if (session('print_struk_url'))
+            <iframe src="{{ session('print_struk_url') }}" class="hidden" id="printFrame"
+                onload="this.contentWindow.print();"></iframe>
+        @endif
+
         <form method="POST" action="{{ route('kasir.store') }}" id="kasirForm">
             @csrf
 
             <div class="flex flex-col lg:flex-row gap-6">
 
-                {{-- MENU SECTION --}}
-                <div class="w-full lg:w-2/3">
-                    <div class="flex items-center justify-between mb-4 px-2">
-                        <h2 class="text-xl font-bold text-gray-800">Pilih Menu</h2>
-                        <span class="text-sm text-gray-500">{{ count($menus) }} Produk Tersedia</span>
+                {{-- ======================== --}}
+                {{-- MENU SECTION (KIRI)      --}}
+                {{-- ======================== --}}
+                <div class="w-full lg:w-2/3 flex flex-col gap-4">
+
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between px-2 gap-3">
+                        <h2 class="text-xl font-bold text-gray-800">Katalog Menu</h2>
+
+                        {{-- Filter Kategori --}}
+                        <div class="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
+                            <button type="button" @click="activeCategory = 'semua'"
+                                :class="activeCategory === 'semua' ? 'bg-gray-800 text-white' :
+                                    'bg-white text-gray-600 hover:bg-gray-100'"
+                                class="px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap border shadow-sm transition-colors">
+                                Semua
+                            </button>
+                            @foreach ($categories as $cat)
+                                <button type="button" @click="activeCategory = '{{ $cat }}'"
+                                    :class="activeCategory === '{{ $cat }}' ? 'bg-primary text-white' :
+                                        'bg-white text-gray-600 hover:bg-gray-100'"
+                                    class="px-4 py-1.5 rounded-full text-xs font-bold uppercase whitespace-nowrap border shadow-sm transition-colors">
+                                    {{ $cat }}
+                                </button>
+                            @endforeach
+                        </div>
                     </div>
-                    
+
+                    {{-- Grid Menu --}}
                     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-                        @foreach($menus as $menu)
-                            <div onclick="addItem({{ $menu->id }}, '{{ $menu->nama }}', {{ $menu->harga }})"
-                                class="bg-white border border-gray-200 rounded-2xl p-2 sm:p-3 text-center cursor-pointer 
-                                       hover:border-blue-500 hover:shadow-md transition-all duration-200 active:scale-95 group">
-                                
-                                {{-- FRAME GAMBAR --}}
-                                <div class="w-full aspect-square bg-gray-100 rounded-xl mb-3 flex items-center justify-center overflow-hidden border border-gray-50">
-                                    @if($menu->image_path)
-                                        <img src="{{ asset('storage/' . $menu->image_path) }}" 
-                                             alt="{{ $menu->nama }}" 
-                                             class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+                        @foreach ($menus as $menu)
+                            <div x-show="activeCategory === 'semua' || activeCategory === '{{ $menu->jenis }}'"
+                                x-transition:enter="transition ease-out duration-200"
+                                x-transition:enter-start="opacity-0 scale-95"
+                                x-transition:enter-end="opacity-100 scale-100"
+                                onclick="addItem({{ $menu->id }}, '{{ addslashes($menu->nama) }}', {{ $menu->harga }})"
+                                class="bg-white border border-gray-200 rounded-2xl p-2 sm:p-3 text-center cursor-pointer hover:border-primary hover:shadow-md transition-all duration-200 active:scale-95 group flex flex-col">
+
+                                <div
+                                    class="w-full aspect-square bg-gray-50 rounded-xl mb-3 flex items-center justify-center overflow-hidden border border-gray-100">
+                                    @if ($menu->image_path)
+                                        <img src="{{ asset('storage/' . $menu->image_path) }}"
+                                            alt="{{ $menu->nama }}"
+                                            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
                                     @else
-                                        {{-- Fallback jika gambar tidak ada --}}
-                                        <div class="flex flex-col items-center">
-                                            <span class="text-gray-300 font-bold text-3xl">{{ substr($menu->nama, 0, 1) }}</span>
-                                            <span class="text-[10px] text-gray-400 mt-1">No Image</span>
+                                        <div class="flex flex-col items-center text-gray-300">
+                                            <svg class="w-10 h-10" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
                                         </div>
                                     @endif
                                 </div>
-
-                                <h3 class="font-semibold text-gray-800 text-sm sm:text-base leading-tight h-10 flex items-center justify-center px-1">
+                                <h3
+                                    class="font-bold text-gray-800 text-xs sm:text-sm leading-tight h-10 flex items-center justify-center">
                                     {{ $menu->nama }}
                                 </h3>
-
-                                <p class="text-blue-600 font-bold mt-2 text-sm sm:text-base">
+                                <p class="text-primary font-bold mt-auto text-sm">
                                     Rp {{ number_format($menu->harga, 0, ',', '.') }}
                                 </p>
                             </div>
@@ -45,87 +108,129 @@
                     </div>
                 </div>
 
-                {{-- CART SECTION --}}
+                {{-- ======================== --}}
+                {{-- CART SECTION (KANAN)     --}}
+                {{-- ======================== --}}
                 <div class="w-full lg:w-1/3">
-                    <div class="bg-white border rounded-2xl p-5 shadow-lg lg:sticky lg:top-6">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="font-bold text-lg text-gray-800">Rincian Order</h3>
-                            <span class="bg-gray-100 text-gray-600 text-xs py-1 px-2 rounded-lg" id="item-count">0 Items</span>
+                    <div
+                        class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm lg:sticky lg:top-6 flex flex-col max-h-[90vh]">
+
+                        <div class="flex items-center justify-between mb-4 shrink-0">
+                            <h3 class="font-bold text-lg text-gray-800">Keranjang</h3>
+                            <span class="bg-primary/10 text-primary text-xs font-bold py-1 px-2 rounded-lg"
+                                id="item-count">0 Item</span>
                         </div>
 
-                        <div id="cart" class="space-y-3 max-h-[40vh] lg:max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
-                            <p class="text-gray-400 text-center py-8">Keranjang masih kosong</p>
+                        {{-- Area Item Keranjang --}}
+                        <div id="cart"
+                            class="space-y-3 flex-1 overflow-y-auto pr-2 custom-scrollbar pb-4 min-h-[200px]">
+                            <div class="h-full flex flex-col items-center justify-center text-gray-400">
+                                <svg class="w-12 h-12 mb-2 opacity-50" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
+                                    </path>
+                                </svg>
+                                <p class="font-medium text-sm">Keranjang masih kosong</p>
+                            </div>
                         </div>
 
-                        <div class="border-t mt-6 pt-4">
-                            <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Metode Pembayaran</label>
-                            <select name="payment_method" class="w-full mt-1 bg-gray-50 border-gray-200 rounded-xl p-3 focus:ring-blue-500 focus:border-blue-500">
-                                <option value="">Pilih Metode</option>
-                                <option value="cash">Cash</option>
-                                <option value="qris">QRIS</option>
-                            </select>
+                        {{-- Area Pembayaran --}}
+                        <div class="border-t border-gray-100 mt-4 pt-4 shrink-0">
 
-                            <div class="mt-6 flex justify-between items-end">
-                                <span class="text-gray-600 uppercase text-xs font-bold">Total Tagihan</span>
-                                <div class="text-2xl font-black text-blue-600">
-                                    <span class="text-sm">Rp</span> <span id="total">0</span>
+                            <div class="mb-4">
+                                <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Metode
+                                    Pembayaran</label>
+                                <select name="payment_method" id="payment_method" onchange="toggleCashInput()"
+                                    class="w-full mt-1.5 bg-gray-50 border-gray-200 rounded-xl p-2.5 text-sm font-bold text-gray-700 focus:ring-primary focus:border-primary transition-colors cursor-pointer">
+                                    <option value="" disabled selected>Pilih Metode Pembayaran</option>
+                                    <option value="cash">Tunai / Cash</option>
+                                    <option value="qris">QRIS (Midtrans)</option>
+                                </select>
+                            </div>
+
+                            <div id="cash_input_area"
+                                class="hidden mb-4 p-3 bg-gray-50 border border-gray-200 rounded-xl space-y-3">
+                                <div>
+                                    <label class="text-xs font-bold text-gray-700 block mb-1">Uang Diterima (Rp)</label>
+                                    <input type="number" name="uang_bayar" id="uang_bayar" oninput="calculateChange()"
+                                        class="w-full border-gray-300 rounded-lg p-2 text-sm font-bold text-gray-900 focus:ring-primary focus:border-primary"
+                                        placeholder="0">
+                                </div>
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="font-semibold text-gray-500">Kembalian:</span>
+                                    <span class="font-bold text-emerald-600">Rp <span
+                                            id="uang_kembali">0</span></span>
+                                </div>
+                            </div>
+
+                            <div
+                                class="flex justify-between items-end mb-5 bg-primary/5 p-3 rounded-xl border border-primary/10">
+                                <span class="text-primary font-bold uppercase text-xs tracking-wider">Total
+                                    Tagihan</span>
+                                <div class="text-2xl font-black text-primary">
+                                    <span class="text-sm mr-1">Rp</span><span id="total">0</span>
                                 </div>
                             </div>
 
                             <input type="hidden" name="with_receipt" id="with_receipt">
+                            <div id="items-input"></div>
 
-                            <div class="grid grid-cols-1 gap-3 mt-6">
-                                <button type="button" onclick="checkout(1)"
-                                    class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl font-bold transition-colors flex items-center justify-center gap-2 shadow-lg shadow-blue-200">
-                                    <span>Cetak Struk & Bayar</span>
-                                </button>
-                                
+                            <div class="grid grid-cols-2 gap-3">
                                 <button type="button" onclick="checkout(0)"
-                                    class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-xl font-semibold transition-colors">
-                                    Bayar Tanpa Struk
+                                    class="w-full bg-white border-2 border-gray-200 hover:bg-gray-50 hover:border-gray-300 text-gray-700 py-3 rounded-xl font-bold transition-all text-sm">
+                                    Bayar Saja
+                                </button>
+                                <button type="button" onclick="checkout(1)"
+                                    class="w-full bg-primary hover:bg-primary-dark text-white py-3 rounded-xl font-bold transition-all shadow-md shadow-primary/20 text-sm flex items-center justify-center gap-1.5">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                    </svg>
+                                    Cetak & Bayar
                                 </button>
                             </div>
                         </div>
 
-                        {{-- RIWAYAT ORDER (Mini Version) --}}
-                        <div class="mt-8 border-t pt-6">
-                            <h3 class="font-bold mb-4 text-gray-800">Riwayat Terakhir</h3>
-                            <div class="space-y-3">
-                                @forelse($orders->take(3) as $order)
-                                    <div class="flex items-center justify-between p-3 rounded-xl {{ $order->with_receipt ? 'bg-green-50' : 'bg-yellow-50' }}">
-                                        <div>
-                                            <p class="text-xs text-gray-500">#{{ $order->id }} • {{ $order->created_at->format('H:i') }}</p>
-                                            <p class="font-bold text-sm">Rp {{ number_format($order->total) }}</p>
-                                        </div>
-                                        <span class="text-[10px] font-bold uppercase px-2 py-1 rounded bg-white shadow-sm">
-                                            {{ $order->with_receipt ? 'Struk' : 'No-Struk' }}
-                                        </span>
-                                    </div>
-                                @empty
-                                    <p class="text-gray-400 text-center text-sm italic">Belum ada transaksi</p>
-                                @endforelse
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
-
-            <div id="items-input"></div>
         </form>
     </div>
 
     <style>
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #cbd5e1;
+        }
     </style>
 
     <script>
         let cart = {};
+        let grandTotal = 0;
 
         function addItem(id, nama, harga) {
             if (!cart[id]) {
-                cart[id] = { menu_id: id, nama: nama, harga: harga, qty: 1 };
+                cart[id] = {
+                    menu_id: id,
+                    nama: nama,
+                    harga: harga,
+                    qty: 1,
+                    catatan: ''
+                };
             } else {
                 cart[id].qty++;
             }
@@ -136,39 +241,73 @@
             cart[id].qty += diff;
             if (cart[id].qty <= 0) delete cart[id];
             renderCart();
+            calculateChange();
+        }
+
+        function updateNote(id, val) {
+            if (cart[id]) {
+                cart[id].catatan = val;
+            }
+        }
+
+        function toggleCashInput() {
+            const method = document.getElementById('payment_method').value;
+            const cashArea = document.getElementById('cash_input_area');
+            if (method === 'cash') {
+                cashArea.classList.remove('hidden');
+                document.getElementById('uang_bayar').focus();
+            } else {
+                cashArea.classList.add('hidden');
+                document.getElementById('uang_bayar').value = '';
+                calculateChange();
+            }
+        }
+
+        function calculateChange() {
+            const bayar = parseInt(document.getElementById('uang_bayar').value) || 0;
+            let kembali = bayar - grandTotal;
+            document.getElementById('uang_kembali').innerText = kembali > 0 ? kembali.toLocaleString('id-ID') : '0';
         }
 
         function renderCart() {
             let html = '';
-            let total = 0;
+            grandTotal = 0;
             let count = 0;
             const entries = Object.values(cart);
 
             if (entries.length === 0) {
-                html = '<p class="text-gray-400 text-center py-8 font-medium">Keranjang masih kosong</p>';
+                html = `
+                <div class="h-full flex flex-col items-center justify-center text-gray-400">
+                    <svg class="w-12 h-12 mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                    <p class="font-medium text-sm">Keranjang masih kosong</p>
+                </div>`;
             } else {
                 entries.forEach(item => {
-                    total += item.harga * item.qty;
+                    grandTotal += item.harga * item.qty;
                     count += item.qty;
                     html += `
-                        <div class="flex justify-between items-center bg-gray-50 p-3 rounded-xl">
-                            <div class="flex-1">
-                                <p class="font-semibold text-sm text-gray-800">${item.nama}</p>
-                                <p class="text-xs text-blue-500 font-medium"> ${item.harga.toLocaleString('id-ID')}</p>
+                        <div class="flex flex-col bg-white border border-gray-100 p-3 rounded-xl shadow-sm">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="flex-1 pr-2">
+                                    <p class="font-bold text-sm text-gray-800 leading-tight">${item.nama}</p>
+                                    <p class="text-xs text-primary font-bold mt-0.5">Rp ${item.harga.toLocaleString('id-ID')}</p>
+                                </div>
+                                <div class="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg p-0.5">
+                                    <button type="button" onclick="changeQty(${item.menu_id}, -1)" class="w-6 h-6 flex items-center justify-center bg-white rounded shadow-sm text-gray-600 font-bold hover:text-red-500">-</button>
+                                    <span class="text-xs font-bold min-w-[16px] text-center">${item.qty}</span>
+                                    <button type="button" onclick="changeQty(${item.menu_id}, 1)" class="w-6 h-6 flex items-center justify-center bg-white rounded shadow-sm text-gray-600 font-bold hover:text-primary">+</button>
+                                </div>
                             </div>
-                            <div class="flex items-center gap-3 bg-white border rounded-lg p-1">
-                                <button type="button" onclick="changeQty(${item.menu_id}, -1)" class="w-7 h-7 flex items-center justify-center hover:bg-gray-100 rounded text-gray-600 font-bold">-</button>
-                                <span class="text-sm font-bold min-w-[20px] text-center">${item.qty}</span>
-                                <button type="button" onclick="changeQty(${item.menu_id}, 1)" class="w-7 h-7 flex items-center justify-center hover:bg-gray-100 rounded text-gray-600 font-bold">+</button>
-                            </div>
+                            <input type="text" onchange="updateNote(${item.menu_id}, this.value)" value="${item.catatan}" placeholder="Catatan opsional (cth: Es dipisah)..." class="w-full text-xs bg-gray-50 border-transparent focus:border-gray-300 focus:ring-0 rounded-md p-1.5 text-gray-600 placeholder-gray-400">
                         </div>
                     `;
                 });
             }
 
             document.getElementById('cart').innerHTML = html;
-            document.getElementById('total').innerText = total.toLocaleString('id-ID');
-            document.getElementById('item-count').innerText = `${count} Items`;
+            document.getElementById('total').innerText = grandTotal.toLocaleString('id-ID');
+            document.getElementById('item-count').innerText = `${count} Item`;
+            calculateChange();
         }
 
         function checkout(receipt) {
@@ -176,10 +315,19 @@
                 alert('Pilih menu terlebih dahulu!');
                 return;
             }
-            const payment = document.querySelector('[name="payment_method"]').value;
+
+            const payment = document.getElementById('payment_method').value;
             if (!payment) {
-                alert('Pilih metode pembayaran!');
+                alert('Silakan pilih metode pembayaran!');
                 return;
+            }
+
+            if (payment === 'cash') {
+                const bayar = parseInt(document.getElementById('uang_bayar').value) || 0;
+                if (bayar < grandTotal) {
+                    alert('Uang pembayaran tunai kurang dari total tagihan!');
+                    return;
+                }
             }
 
             document.getElementById('with_receipt').value = receipt;
@@ -191,10 +339,34 @@
                     <input type="hidden" name="items[${index}][menu_id]" value="${item.menu_id}">
                     <input type="hidden" name="items[${index}][harga]" value="${item.harga}">
                     <input type="hidden" name="items[${index}][qty]" value="${item.qty}">
+                    <input type="hidden" name="items[${index}][catatan]" value="${item.catatan}">
                 `;
             });
 
             document.getElementById('kasirForm').submit();
         }
+
+        // ==========================================
+        // HANDLE MIDTRANS SNAP POPUP (JIKA QRIS)
+        // ==========================================
+        @if (session('snap_token'))
+            snap.pay('{{ session('snap_token') }}', {
+                onSuccess: function(result) {
+                    alert("Pembayaran QRIS Berhasil!");
+
+                    window.location.href =
+                        "{{ url('/kasir/qris-success') }}/{{ session('order_id') }}?with_receipt={{ session('with_receipt') }}";
+                },
+                onPending: function(result) {
+                    alert("Menunggu pembayaran Anda diselesaikan.");
+                },
+                onError: function(result) {
+                    alert("Pembayaran gagal. Silakan coba lagi.");
+                },
+                onClose: function() {
+                    alert('Anda menutup popup tanpa menyelesaikan pembayaran.');
+                }
+            });
+        @endif
     </script>
 </x-app-layout>

@@ -10,7 +10,7 @@ class OrderItem extends Model
     use HasFactory;
 
     // Pastikan fillable kamu tetap seperti ini (atau sesuaikan dengan yang sudah kamu buat sebelumnya)
-    protected $fillable = ['order_id', 'menu_id', 'harga', 'qty', 'subtotal'];
+    protected $fillable = ['order_id', 'menu_id', 'harga', 'qty', 'subtotal', 'catatan'];
 
     // 1. TAMBAHKAN FUNGSI INI: Relasi ke tabel Order
     public function order()

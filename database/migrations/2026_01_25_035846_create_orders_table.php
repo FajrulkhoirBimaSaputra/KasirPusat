@@ -12,14 +12,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('orders', function (Blueprint $table) {
-    $table->id();
-    $table->foreignId('user_id')->constrained()->cascadeOnDelete(); // kasir
-    $table->integer('total');
-    $table->enum('payment_method', ['cash', 'qris']);
-    $table->boolean('with_receipt')->default(true);
-    $table->timestamps();
-});
-
+            $table->id();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete(); // kasir
+            $table->integer('total');
+            $table->integer('uang_bayar')->nullable();
+            $table->integer('uang_kembali')->nullable();
+            $table->enum('payment_method', ['cash', 'qris']);
+            $table->string('payment_status')->default('paid');
+            $table->string('snap_token')->nullable();
+            $table->boolean('with_receipt')->default(true);
+            $table->timestamps();
+        });
     }
 
     /**

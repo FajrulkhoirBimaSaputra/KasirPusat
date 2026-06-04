@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
 
 class Ingredient extends Model
 {
@@ -13,6 +14,11 @@ class Ingredient extends Model
 
     public function user()
     {
-        return $this->belongsTo(\App\Models\User::class, 'last_updated_by');
+        return $this->belongsTo(User::class, 'last_updated_by');
+    }
+
+    public function histories()
+    {
+        return $this->hasMany(IngredientHistory::class);
     }
 }

@@ -1,66 +1,84 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+Berikut adalah _template_ `README.md` yang ringkas, rapi, dan _to-the-point_ sesuai dengan alur kerja (pull -> refresh database -> seed admin) yang kamu minta.
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Kamu tinggal _copy_ kode di bawah ini dan _paste_ ke dalam file `README.md` di _root_ direktori proyek Laravel kamu:
 
-## About Laravel
+````markdown
+# 🛒 Sistem Manajemen Kasir & POS
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Aplikasi Point of Sales (POS) berbasis Laravel untuk mengelola transaksi kasir, manajemen kas (shift), laporan keuangan analitik, dan pelacakan stok bahan baku secara _real-time_.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 🚀 Panduan Pembaruan & Setup Database
 
-## Learning Laravel
+Jika Anda baru saja melakukan _clone_ atau ingin mengambil pembaruan kode terbaru dari GitHub dan mereset sistem ke kondisi awal, ikuti langkah-langkah berikut:
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 1. Ambil Kode Terbaru dari GitHub (Pull)
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+Buka terminal di dalam folder proyek, pastikan Anda berada di _branch_ yang benar, lalu tarik pembaruan terbaru:
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```bash
+git pull origin main
+```
+````
 
-## Laravel Sponsors
+_(Catatan: Ubah `main` menjadi `master` jika repositori Anda menggunakan master sebagai branch utama)._
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### 2. Update Dependensi (Opsional namun Disarankan)
 
-### Premium Partners
+Jika ada penambahan _package_ baru pada pembaruan tersebut, jalankan perintah ini:
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+```bash
+composer install
+npm install
+npm run build
 
-## Contributing
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 3. Refresh Database (Migrate:Fresh)
 
-## Code of Conduct
+**⚠️ PERINGATAN:** Perintah ini akan **MENGHAPUS (DROP)** seluruh tabel dan data lama di database, lalu membuat ulang struktur tabelnya dari awal. Pastikan Anda tidak melakukan ini di database _Production_ yang datanya masih terpakai!
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+php artisan migrate:fresh
 
-## Security Vulnerabilities
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 4. Jalankan Seeder Akun Admin
 
-## License
+Setelah database kosong dan struktur tabel baru terbentuk, jalankan _seeder_ untuk membuat akun Admin standar agar Anda bisa _login_ ke dalam sistem.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Jalankan perintah berikut (jika Anda memisahkan seeder admin):
+
+```bash
+php artisan db:seed --class=AdminSeeder
+
+```
+
+_(Atau, jika seeder admin sudah dimasukkan ke dalam pemanggilan `DatabaseSeeder.php` utama, Anda cukup menggunakan jalan pintas ini untuk langkah 3 dan 4 sekaligus):_
+
+```bash
+php artisan migrate:fresh --seed
+
+```
+
+---
+
+## 🔐 Kredensial Login Default
+
+Setelah _seeder_ berhasil dijalankan, Anda dapat masuk ke dasbor menggunakan akun berikut:
+
+- **Role:** Admin Pusat
+- **Email:** `admin@admin.com` _(Sesuaikan dengan konfigurasi file seeder Anda)_
+- **Password:** `password`
+
+---
+
+**💡 Catatan Tambahan:**
+Pastikan file `.env` Anda sudah terkonfigurasi dengan benar (terutama bagian `DB_DATABASE`, `DB_USERNAME`, dan `DB_PASSWORD`) sebelum menjalankan perintah _migrate_. Jika file `.env` belum ada, _copy_ dari `.env.example` lalu jalankan `php artisan key:generate`.
+
+```
+
+*Template* ini sudah sangat standar dan profesional untuk dibaca oleh *developer* lain (atau untuk pengingat dirimu sendiri di masa depan) saat ingin menjalankan aplikasi ini di komputer/server baru!
+
+```

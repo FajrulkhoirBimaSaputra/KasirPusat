@@ -48,13 +48,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/kasir', [KasirController::class, 'index'])->name('kasir.index');
     Route::get('/kasir/riwayat', [KasirController::class, 'riwayat'])->name('kasir.riwayat');
     Route::post('/kasir', [KasirController::class, 'store'])->name('kasir.store');
-    Route::get('/kasir/struk/{order}', [KasirController::class, 'struk'])
-        ->name('kasir.struk');
+    Route::get('/kasir/struk/{order}', [KasirController::class, 'struk'])->name('kasir.struk');
     Route::get('/kasir/ringkasan', [KasirController::class, 'ringkasan'])->name('kasir.ringkasan');
     Route::get('/kasir/manajemen-kas', [KasirController::class, 'manajemenKas'])->name('kasir.manajemen-kas');
     Route::post('/kasir/manajemen-kas', [KasirController::class, 'storeKas'])->name('kasir.store-kas');
     Route::get('/kasir/stok', [KasirController::class, 'stok'])->name('kasir.stok');
     Route::put('/kasir/stok/{ingredient}', [KasirController::class, 'updateStok'])->name('kasir.updateStok');
+    Route::get('/kasir/qris-success/{id}', [KasirController::class, 'qrisSuccess'])->name('kasir.qris-success');
+    Route::post('/kasir/tutup-shift', [KasirController::class, 'tutupShift'])->name('kasir.tutup-shift');
 });
 
 
