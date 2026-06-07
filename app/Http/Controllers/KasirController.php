@@ -363,4 +363,69 @@ class KasirController extends Controller
 
         return redirect()->route('kasir.index')->with('success', 'Pembayaran QRIS Lunas!');
     }
+
+    /**
+     * Menampilkan layout khusus untuk cetak Struk Thermal Laporan Shift
+     */
+    public function strukShift()
+    {
+        // Copy seluruh logika dari fungsi ringkasan()
+        $modalAwalRecord = \App\Models\Kas::where('user_id', Auth::id())
+            ->whereDate('created_at', now()->toDateString())
+            ->where('keterangan', 'Modal Awal Shift')
+            ->first();
+
+        if (!$modalAwalRecord) {
+            return redirect()->route('kasir.manajemen-kas')->with('error', 'Shift belum dibuka!');
+        }
+
+        $modalAwal = $modalAwalRecord->nominal;
+        $waktuBukaShift = $modalAwalRecord->created_at;
+
+        $ordersToday = \App\Models\Order::where('user_id', Auth::id())
+            ->whereDate('created_at', now()->toDateString())
+            ->where('payment_status', 'paid')
+            ->get();
+
+        $totalTransaksiHariIni = $ordersToday->count();
+        $penjualanKotor = $ordersToday->sum('total');
+
+        $tunai = $ordersToday->where('payment_method', 'cash')->sum('total');
+        $qris = $ordersToday->where('payment_method', 'qris')->sum('total');
+
+        $pemasukan = \App\Models\Kas::where('user_id', Auth::id())
+            ->whereDate('created_at', now()->toDateString())
+            ->where('jenis', 'pemasukan')
+            ->where('keterangan', '!=', 'Modal Awal Shift')
+            ->sum('nominal');
+
+        $pengeluaran = \App\Models\Kas::where('user_id', Auth::id())
+            ->whereDate('created_at', now()->toDateString())
+            ->where('jenis', 'pengeluaran')
+            ->where('keterangan', '!=', 'Tutup Shift')
+            ->sum('nominal');
+
+        $uangDikembalikan = \App\Models\Kas::where('user_id', Auth::id())
+            ->whereDate('created_at', now()->toDateString())
+            ->where('jenis', 'refund')
+            ->sum('nominal');
+
+        $penjualanBersih = $penjualanKotor - $uangDikembalikan;
+        $jumlahTunaiDiharapkan = $modalAwal + $tunai + $pemasukan - $pengeluaran - $uangDikembalikan;
+
+        // RETURN KE FILE BLADE STRUK KHUSUS
+        return view('kasir.struk-shift', compact(
+            'totalTransaksiHariIni',
+            'penjualanKotor',
+            'penjualanBersih',
+            'tunai',
+            'qris',
+            'modalAwal',
+            'waktuBukaShift',
+            'uangDikembalikan',
+            'pemasukan',
+            'pengeluaran',
+            'jumlahTunaiDiharapkan'
+        ));
+    }
 }

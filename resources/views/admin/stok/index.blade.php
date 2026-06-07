@@ -2,22 +2,28 @@
     <div x-data="{
         openModal: false,
         openHistoryModal: false,
+        deleteModalOpen: false,
+        deleteUrl: '',
+        deleteName: '',
         editMode: false,
         currentItem: { id: '', nama: '', stok: '' },
         activeIngredientName: '',
         activeHistories: [],
-        filterDate: '', // State untuk filter tanggal
+        filterDate: '',
     
-        // Fungsi dinamis url action form
         getActionUrl() {
             return this.editMode ? '/admin/stok/' + this.currentItem.id : '/admin/stok';
         },
     
-        // Computed property untuk memfilter riwayat berdasarkan tanggal
+        openDeleteModal(url, name) {
+            this.deleteUrl = url;
+            this.deleteName = name;
+            this.deleteModalOpen = true;
+        },
+    
         get filteredHistories() {
             if (!this.filterDate) return this.activeHistories;
             return this.activeHistories.filter(history => {
-                // history.created_at format aslinya YYYY-MM-DDTHH:mm:ss.000000Z
                 return history.created_at.startsWith(this.filterDate);
             });
         }
@@ -134,19 +140,13 @@
                                             d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                     </svg>
                                 </button>
-                                <form action="{{ route('admin.stok.destroy', $item->id) }}" method="POST"
-                                    class="m-0 p-0"
-                                    onsubmit="return confirm('Apakah Anda yakin ingin menghapus bahan ini?');">
-                                    @csrf @method('DELETE')
-                                    <button type="submit"
-                                        class="p-2 text-red-500 hover:bg-red-50 border border-transparent hover:border-red-200 rounded-lg transition-all"
-                                        title="Hapus Bahan">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                    </button>
-                                </form>
+                                <button @click="openDeleteModal('/admin/stok/{{ $item->id }}', '{{ addslashes($item->nama) }}')"
+                                    class="p-2 text-red-500 hover:bg-red-50 rounded-lg">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -266,21 +266,17 @@
                                             </button>
 
                                             {{-- Tombol Hapus --}}
-                                            <form action="{{ route('admin.stok.destroy', $item->id) }}"
-                                                method="POST" class="m-0 p-0"
-                                                onsubmit="return confirm('Apakah Anda yakin ingin menghapus bahan ini?');">
-                                                @csrf @method('DELETE')
-                                                <button type="submit"
-                                                    class="p-2 text-red-500 hover:bg-red-50 border border-transparent hover:border-red-200 rounded-lg transition-all"
-                                                    title="Hapus Bahan">
-                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                                                        viewBox="0 0 24 24">
-                                                        <path stroke-width="2" stroke-linecap="round"
-                                                            stroke-linejoin="round"
-                                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                    </svg>
-                                                </button>
-                                            </form>
+                                            <button
+                                                @click="openDeleteModal('/admin/stok/{{ $item->id }}', '{{ addslashes($item->nama) }}')"
+                                                class="p-2 text-red-500 hover:bg-red-50 border border-transparent hover:border-red-200 rounded-lg transition-all"
+                                                title="Hapus Bahan Baku">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-width="2" stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -299,6 +295,27 @@
                         </tbody>
                     </table>
                 </div>
+            </div>
+        </div>
+
+        <div x-show="deleteModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center p-4" x-cloak>
+            <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm" @click="deleteModalOpen = false"></div>
+            <div class="bg-white rounded-3xl p-8 max-w-sm w-full relative shadow-2xl">
+                <div class="flex justify-center mb-4 text-red-500"><svg class="w-12 h-12" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-width="2"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg></div>
+                <h3 class="text-center font-black text-xl">Hapus Bahan Baku?</h3>
+                <p class="text-center text-gray-500 text-sm mt-2">Anda yakin ingin menghapus <b class="text-gray-900"
+                        x-text="deleteName"></b>? Data ini tidak bisa dikembalikan.</p>
+                <form :action="deleteUrl" method="POST" class="mt-6 flex gap-3">
+                    @csrf @method('DELETE')
+                    <button type="button" @click="deleteModalOpen = false"
+                        class="flex-1 py-2.5 bg-gray-100 rounded-xl font-bold">Batal</button>
+                    <button type="submit" class="flex-1 py-2.5 bg-red-600 text-white rounded-xl font-bold">Ya,
+                        Hapus</button>
+                </form>
             </div>
         </div>
 

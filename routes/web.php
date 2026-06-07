@@ -57,6 +57,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/kasir/stok/{ingredient}', [KasirController::class, 'updateStok'])->name('kasir.updateStok');
     Route::get('/kasir/qris-success/{id}', [KasirController::class, 'qrisSuccess'])->name('kasir.qris-success');
     Route::post('/kasir/tutup-shift', [KasirController::class, 'tutupShift'])->name('kasir.tutup-shift');
+    Route::get('/kasir/struk-shift', [KasirController::class, 'strukShift'])->name('kasir.struk-shift');
 });
 
 

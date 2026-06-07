@@ -33,6 +33,7 @@
                 </div>
 
                 <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+                    {{-- Form Filter Tampilan Tahun --}}
                     <form action="{{ route('laporan.bulanan') }}" method="GET"
                         class="flex items-center gap-3 bg-white border border-gray-200 rounded-xl px-5 py-3 shadow-sm w-full md:w-auto">
                         <span class="text-sm font-bold text-gray-400 uppercase tracking-wider">Tahun Laporan</span>
@@ -47,22 +48,36 @@
                         </div>
                     </form>
 
-                    <a href="{{ route('laporan.bulanan.export', ['tahun' => $tahunTerpilih]) }}"
-                        class="flex items-center justify-center gap-2 bg-[#107c41] hover:bg-[#185c37] text-white text-sm font-bold py-3.5 px-5 rounded-xl shadow-sm transition-all w-full md:w-auto transform hover:-translate-y-0.5">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        Export Excel
-                    </a>
+                    {{-- Form Export Excel Custom Range Tanggal --}}
+                    <form action="{{ route('laporan.bulanan.export') }}" method="GET"
+                        class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+                        <div
+                            class="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2 shadow-sm w-full sm:w-auto">
+                            <input type="date" name="tanggal_mulai"
+                                value="{{ now()->startOfMonth()->format('Y-m-d') }}" required
+                                class="block w-full py-1 text-sm font-bold text-gray-900 bg-transparent border-none focus:ring-0 cursor-pointer p-0 shadow-none">
+
+                            <span class="text-xs font-bold text-gray-400 uppercase px-1">s/d</span>
+
+                            <input type="date" name="tanggal_selesai" value="{{ now()->format('Y-m-d') }}" required
+                                class="block w-full py-1 text-sm font-bold text-gray-900 bg-transparent border-none focus:ring-0 cursor-pointer p-0 shadow-none">
+                        </div>
+
+                        <button type="submit"
+                            class="flex items-center justify-center gap-2 bg-[#107c41] hover:bg-[#185c37] text-white text-sm font-bold py-3.5 px-5 rounded-xl shadow-sm transition-all w-full md:w-auto transform hover:-translate-y-0.5">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            Export Excel
+                        </button>
+                    </form>
                 </div>
             </div>
 
-
-
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
-                {{-- KOLOM KIRI: DAFTAR BULAN (Detail Metrik) --}}
+                {{-- KOLOM KIRI: DAFTAR BULAN (Detail Metrik Keuangan) --}}
                 <div class="lg:col-span-7 space-y-4">
 
                     @forelse($laporanBulanan as $data)
@@ -133,7 +148,7 @@
 
                             </div>
 
-                            {{-- Accordion Content Khusus Mobile (Detail Produk) --}}
+                            {{-- Accordion Content Khusus Mobile (Detail Rincian Harian) --}}
                             <div x-show="activeMonth === '{{ $data['bulan'] }}'" x-collapse
                                 class="lg:hidden border-t border-gray-100 bg-gray-50 p-5">
                                 <h5
@@ -143,31 +158,49 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                                     </svg>
-                                    Detail Produk Terjual
+                                    Rincian Penjualan Harian
                                 </h5>
 
                                 <template
-                                    x-if="allProducts['{{ $data['bulan'] }}'] && allProducts['{{ $data['bulan'] }}'].length > 0">
+                                    x-if="allProducts[activeMonth] && Object.keys(allProducts[activeMonth]).length > 0">
                                     <div class="space-y-3">
-                                        <template x-for="(item, index) in allProducts['{{ $data['bulan'] }}']"
-                                            :key="index">
-                                            <div
-                                                class="flex items-center justify-between border-b border-gray-200/50 pb-2 last:border-0 last:pb-0">
-                                                <div>
-                                                    <p class="font-bold text-gray-800 text-sm leading-tight"
-                                                        x-text="item.nama"></p>
-                                                    <p class="text-[10px] text-gray-500 font-medium mt-0.5"
-                                                        x-text="item.qty + ' porsi terjual'"></p>
+                                        <template x-for="(items, tanggal) in allProducts[activeMonth]"
+                                            :key="tanggal">
+                                            <div x-data="{ openHari: false }"
+                                                class="bg-white rounded-xl border border-gray-200 overflow-hidden mb-2">
+                                                <div @click="openHari = !openHari"
+                                                    class="flex items-center justify-between p-3 cursor-pointer bg-gray-50/50 hover:bg-gray-50">
+                                                    <span class="text-xs font-bold text-gray-700"
+                                                        x-text="tanggal"></span>
+                                                    <svg class="w-4 h-4 text-gray-400 transition-transform"
+                                                        :class="openHari ? 'rotate-180' : ''" fill="none"
+                                                        stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2" d="M19 9l-7 7-7-7" />
+                                                    </svg>
                                                 </div>
-                                                <div class="text-xs font-bold text-primary">Rp <span
-                                                        x-text="formatRupiah(item.total)"></span></div>
+                                                <div x-show="openHari" x-collapse
+                                                    class="p-3 border-t border-gray-100 space-y-2.5">
+                                                    <template x-for="(item, index) in items" :key="index">
+                                                        <div class="flex items-center justify-between">
+                                                            <div>
+                                                                <p class="font-bold text-gray-800 text-sm"
+                                                                    x-text="item.nama"></p>
+                                                                <p class="text-[10px] text-gray-500 font-medium"
+                                                                    x-text="item.qty + ' porsi'"></p>
+                                                            </div>
+                                                            <div class="text-xs font-bold text-primary">Rp <span
+                                                                    x-text="formatRupiah(item.total)"></span></div>
+                                                        </div>
+                                                    </template>
+                                                </div>
                                             </div>
                                         </template>
                                     </div>
                                 </template>
 
                                 <template
-                                    x-if="!allProducts['{{ $data['bulan'] }}'] || allProducts['{{ $data['bulan'] }}'].length === 0">
+                                    x-if="!allProducts[activeMonth] || Object.keys(allProducts[activeMonth]).length === 0">
                                     <p class="text-xs text-gray-500 text-center py-2">Belum ada data penjualan.</p>
                                 </template>
                             </div>
@@ -186,12 +219,12 @@
                     @endforelse
                 </div>
 
-                {{-- KOLOM KANAN: DETAIL PRODUK (DESKTOP SAJA - STICKY) --}}
+                {{-- KOLOM KANAN: DETAIL PRODUK HARIAN (DESKTOP SAJA - STICKY DENGAN ACCORDION) --}}
                 <div
                     class="hidden lg:flex lg:col-span-5 sticky top-6 bg-white rounded-3xl shadow-sm border border-gray-100 flex-col overflow-hidden max-h-[85vh]">
                     <div class="p-6 border-b border-gray-100 bg-gray-50/80 flex items-start justify-between shrink-0">
                         <div>
-                            <h3 class="font-black text-gray-900 text-lg">Rincian Penjualan Produk</h3>
+                            <h3 class="font-black text-gray-900 text-lg">Rincian Penjualan Harian</h3>
                             <p class="text-sm font-bold text-primary mt-1"
                                 x-text="activeMonth ? 'Periode Bulan ' + activeMonth : 'Silakan Pilih Bulan di Samping'">
                             </p>
@@ -205,43 +238,79 @@
                         </div>
                     </div>
 
-                    <div class="p-6 flex-grow overflow-y-auto custom-scrollbar">
-                        <template x-if="activeMonth && allProducts[activeMonth]">
-                            <div>
-                                <template x-for="(item, index) in allProducts[activeMonth]" :key="index">
-                                    <div class="flex items-center justify-between mb-5 last:mb-0 group">
-                                        <div class="flex items-center gap-4">
-                                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-gray-500 bg-gray-100 group-hover:bg-primary group-hover:text-white transition-colors"
-                                                x-text="index + 1"></div>
-                                            <div>
-                                                <h4 class="font-bold text-gray-800 text-sm group-hover:text-primary transition-colors"
-                                                    x-text="item.nama"></h4>
-                                                <p
-                                                    class="text-[11px] text-gray-500 font-medium uppercase tracking-wider mt-0.5">
-                                                    <span class="font-bold text-gray-700" x-text="item.qty"></span>
-                                                    porsi
-                                                </p>
+                    <div class="p-6 flex-grow overflow-y-auto custom-scrollbar space-y-3 bg-gray-50/30">
+                        {{-- Tampilan Data Jika Bulan Dipilih & Memiliki Riwayat Penjualan --}}
+                        <template
+                            x-if="activeMonth && allProducts[activeMonth] && Object.keys(allProducts[activeMonth]).length > 0">
+                            <div class="space-y-3">
+                                <template x-for="(items, tanggal) in allProducts[activeMonth]" :key="tanggal">
+                                    {{-- Suntikkan x-data open mandiri di tiap baris tanggal agar bisa dilipat otomatis --}}
+                                    <div x-data="{ openHari: false }"
+                                        class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden transition-all duration-200">
+
+                                        <div @click="openHari = !openHari"
+                                            class="flex items-center justify-between p-4 cursor-pointer bg-white hover:bg-gray-50/80 transition-colors select-none">
+                                            <div class="flex items-center gap-2.5">
+                                                <svg class="w-4 h-4 text-primary" fill="none"
+                                                    stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                                    </path>
+                                                </svg>
+                                                <span class="text-xs font-black text-gray-700 tracking-wide"
+                                                    x-text="tanggal"></span>
                                             </div>
+                                            <svg class="w-4 h-4 text-gray-400 transition-transform duration-200"
+                                                :class="openHari ? 'rotate-180 text-primary' : ''" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 9l-7 7-7-7" />
+                                            </svg>
                                         </div>
-                                        <div
-                                            class="text-right font-black text-gray-900 group-hover:text-primary transition-colors">
-                                            Rp <span x-text="formatRupiah(item.total)"></span>
+
+                                        <div x-show="openHari" x-collapse
+                                            class="border-t border-gray-100 p-4 bg-gray-50/50 space-y-3.5">
+                                            <template x-for="(item, index) in items" :key="index">
+                                                <div class="flex items-center justify-between group">
+                                                    <div class="flex items-center gap-3">
+                                                        <div class="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-gray-400 bg-white border border-gray-200 group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-colors"
+                                                            x-text="index + 1"></div>
+                                                        <div>
+                                                            <h4 class="font-bold text-gray-800 text-sm group-hover:text-primary transition-colors leading-none mb-1"
+                                                                x-text="item.nama"></h4>
+                                                            <p
+                                                                class="text-[10px] text-gray-500 font-medium uppercase tracking-wider">
+                                                                <span class="font-bold text-gray-600"
+                                                                    x-text="item.qty"></span> porsi</p>
+                                                        </div>
+                                                    </div>
+                                                    <div
+                                                        class="text-right text-sm font-black text-gray-900 group-hover:text-primary transition-colors">
+                                                        Rp <span x-text="formatRupiah(item.total)"></span>
+                                                    </div>
+                                                </div>
+                                            </template>
                                         </div>
                                     </div>
                                 </template>
-
-                                <div x-show="allProducts[activeMonth].length === 0"
-                                    class="text-center py-16 flex flex-col items-center justify-center">
-                                    <svg class="w-16 h-16 text-gray-200 mb-4" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                            d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                                    </svg>
-                                    <p class="text-gray-400 font-bold">Belum ada transaksi di bulan ini.</p>
-                                </div>
                             </div>
                         </template>
 
+                        {{-- Tampilan Jika Bulan Dipilih Tapi Kosong Tanpa Transaksi --}}
+                        <template
+                            x-if="activeMonth && (!allProducts[activeMonth] || Object.keys(allProducts[activeMonth]).length === 0)">
+                            <div class="text-center py-16 flex flex-col items-center justify-center">
+                                <svg class="w-16 h-16 text-gray-200 mb-4" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                        d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                                </svg>
+                                <p class="text-gray-400 font-bold">Belum ada transaksi di bulan ini.</p>
+                            </div>
+                        </template>
+
+                        {{-- Tampilan Standar / Default Saat Pertama Membuka Halaman --}}
                         <template x-if="!activeMonth">
                             <div class="text-center py-20 flex flex-col items-center justify-center h-full">
                                 <svg class="w-16 h-16 text-gray-200 mb-4 animate-bounce" fill="none"
@@ -250,7 +319,7 @@
                                         d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
                                 </svg>
                                 <p class="text-gray-400 font-bold">Klik salah satu bulan di samping<br>untuk melihat
-                                    rincian produk.</p>
+                                    rincian harian.</p>
                             </div>
                         </template>
                     </div>
@@ -261,6 +330,23 @@
     </div>
 
     <style>
+        .animate-fadeIn {
+            opacity: 0;
+            animation: fadeIn 0.2s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(4px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         .custom-scrollbar::-webkit-scrollbar {
             width: 5px;
         }

@@ -14,9 +14,13 @@
     <script type="text/javascript" src="https://app.sandbox.midtrans.com/snap/snap.js"
         data-client-key="{{ env('MIDTRANS_CLIENT_KEY') }}"></script>
 
+    {{-- CONTAINER UNTUK TOAST NOTIFICATION --}}
+    <div id="toast-container"
+        class="fixed top-5 left-1/2 transform -translate-x-1/2 z-[100] flex flex-col gap-2 pointer-events-none"></div>
+
     <div class="max-w-7xl mx-auto p-2 sm:p-4 md:p-6" x-data="{ activeCategory: 'semua' }">
 
-        {{-- ALERT SUCCESS --}}
+        {{-- ALERT SUCCESS BEKAS SUBMIT SEBELUMNYA --}}
         @if (session('success'))
             <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)" x-transition.duration.500ms
                 class="mb-6 flex items-center p-4 text-emerald-800 rounded-xl bg-emerald-50 border border-emerald-200 shadow-sm"
@@ -81,7 +85,7 @@
                                 class="bg-white border border-gray-200 rounded-2xl p-2 sm:p-3 text-center cursor-pointer hover:border-primary hover:shadow-md transition-all duration-200 active:scale-95 group flex flex-col">
 
                                 <div
-                                    class="w-full aspect-square bg-gray-50 rounded-xl mb-3 flex items-center justify-center overflow-hidden border border-gray-100">
+                                    class="w-full aspect-square bg-gray-50 rounded-xl mb-3 flex items-center justify-center overflow-hidden border border-gray-100 relative">
                                     @if ($menu->image_path)
                                         <img src="{{ asset('storage/' . $menu->image_path) }}"
                                             alt="{{ $menu->nama }}"
@@ -138,38 +142,64 @@
                         {{-- Area Pembayaran --}}
                         <div class="border-t border-gray-100 mt-4 pt-4 shrink-0">
 
-                            <div class="mb-4">
-                                <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Metode
+                            {{-- UI BARU: Visual Card Payment Method --}}
+                            <div class="mb-5">
+                                <label
+                                    class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 block">Metode
                                     Pembayaran</label>
-                                <select name="payment_method" id="payment_method" onchange="toggleCashInput()"
-                                    class="w-full mt-1.5 bg-gray-50 border-gray-200 rounded-xl p-2.5 text-sm font-bold text-gray-700 focus:ring-primary focus:border-primary transition-colors cursor-pointer">
-                                    <option value="" disabled selected>Pilih Metode Pembayaran</option>
-                                    <option value="cash">Tunai / Cash</option>
-                                    <option value="qris">QRIS (Midtrans)</option>
-                                </select>
+                                <input type="hidden" name="payment_method" id="payment_method" value="">
+
+                                <div class="grid grid-cols-2 gap-3">
+                                    {{-- Opsi Tunai --}}
+                                    <button type="button" id="btn-cash" onclick="selectPayment('cash')"
+                                        class="flex flex-col items-center justify-center p-3 border-2 border-gray-100 bg-gray-50 rounded-xl hover:border-emerald-400 hover:bg-emerald-50 transition-all focus:outline-none group">
+                                        <svg class="w-6 h-6 mb-1.5 text-gray-400 group-hover:text-emerald-500 transition-colors"
+                                            id="icon-cash" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                                        </svg>
+                                        <span class="text-xs font-bold text-gray-600 group-hover:text-emerald-700"
+                                            id="text-cash">Tunai / Cash</span>
+                                    </button>
+
+                                    {{-- Opsi QRIS --}}
+                                    <button type="button" id="btn-qris" onclick="selectPayment('qris')"
+                                        class="flex flex-col items-center justify-center p-3 border-2 border-gray-100 bg-gray-50 rounded-xl hover:border-blue-400 hover:bg-blue-50 transition-all focus:outline-none group">
+                                        <svg class="w-6 h-6 mb-1.5 text-gray-400 group-hover:text-blue-500 transition-colors"
+                                            id="icon-qris" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                                        </svg>
+                                        <span class="text-xs font-bold text-gray-600 group-hover:text-blue-700"
+                                            id="text-qris">QRIS (Digital)</span>
+                                    </button>
+                                </div>
                             </div>
 
                             <div id="cash_input_area"
-                                class="hidden mb-4 p-3 bg-gray-50 border border-gray-200 rounded-xl space-y-3">
+                                class="hidden mb-4 p-4 bg-emerald-50 border border-emerald-100 rounded-xl space-y-3">
                                 <div>
-                                    <label class="text-xs font-bold text-gray-700 block mb-1">Uang Diterima (Rp)</label>
-                                    <input type="number" name="uang_bayar" id="uang_bayar" oninput="calculateChange()"
-                                        class="w-full border-gray-300 rounded-lg p-2 text-sm font-bold text-gray-900 focus:ring-primary focus:border-primary"
-                                        placeholder="0">
+                                    <label class="text-xs font-bold text-emerald-800 block mb-1">Uang Diterima dari
+                                        Pelanggan (Rp)</label>
+                                    <input type="number" name="uang_bayar" id="uang_bayar"
+                                        oninput="calculateChange()"
+                                        class="w-full border-emerald-200 shadow-inner rounded-lg p-2.5 text-sm font-bold text-gray-900 focus:ring-emerald-500 focus:border-emerald-500"
+                                        placeholder="Ketik nominal uang...">
                                 </div>
-                                <div class="flex justify-between items-center text-sm">
-                                    <span class="font-semibold text-gray-500">Kembalian:</span>
-                                    <span class="font-bold text-emerald-600">Rp <span
+                                <div
+                                    class="flex justify-between items-center text-sm pt-2 border-t border-emerald-200/50">
+                                    <span class="font-bold text-emerald-700">Kembalian:</span>
+                                    <span class="font-black text-emerald-600 text-lg">Rp <span
                                             id="uang_kembali">0</span></span>
                                 </div>
                             </div>
 
-                            <div
-                                class="flex justify-between items-end mb-5 bg-primary/5 p-3 rounded-xl border border-primary/10">
-                                <span class="text-primary font-bold uppercase text-xs tracking-wider">Total
+                            <div class="flex justify-between items-end mb-5 bg-gray-800 p-4 rounded-xl shadow-inner">
+                                <span class="text-gray-400 font-bold uppercase text-xs tracking-wider">Total
                                     Tagihan</span>
-                                <div class="text-2xl font-black text-primary">
-                                    <span class="text-sm mr-1">Rp</span><span id="total">0</span>
+                                <div class="text-3xl font-black text-white">
+                                    <span class="text-base font-bold text-gray-400 mr-1">Rp</span><span
+                                        id="total">0</span>
                                 </div>
                             </div>
 
@@ -179,7 +209,7 @@
                             <div class="grid grid-cols-2 gap-3">
                                 <button type="button" onclick="checkout(0)"
                                     class="w-full bg-white border-2 border-gray-200 hover:bg-gray-50 hover:border-gray-300 text-gray-700 py-3 rounded-xl font-bold transition-all text-sm">
-                                    Bayar Saja
+                                    Hanya Bayar
                                 </button>
                                 <button type="button" onclick="checkout(1)"
                                     class="w-full bg-primary hover:bg-primary-dark text-white py-3 rounded-xl font-bold transition-all shadow-md shadow-primary/20 text-sm flex items-center justify-center gap-1.5">
@@ -222,6 +252,92 @@
         let cart = {};
         let grandTotal = 0;
 
+        // FUNGSI UNTUK MENAMPILKAN TOAST NOTIFICATION MODERN (Menggantikan Alert)
+        function showToast(message, type = 'error') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+
+            // Konfigurasi warna berdasarkan tipe error/success/warning
+            let bgClass = type === 'error' ? 'bg-red-50 border-red-200 text-red-800' :
+                (type === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' :
+                    'bg-amber-50 border-amber-200 text-amber-800');
+
+            let iconSvg = type === 'error' ?
+                `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />` :
+                (type === 'success' ?
+                    `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />` :
+                    `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />`
+                    );
+
+            let iconColor = type === 'error' ? 'text-red-500' : (type === 'success' ? 'text-emerald-500' :
+            'text-amber-500');
+
+            toast.className =
+                `transform transition-all duration-300 -translate-y-10 opacity-0 flex items-center p-4 rounded-2xl shadow-lg border ${bgClass} pointer-events-auto`;
+            toast.innerHTML = `
+                <svg class="w-6 h-6 mr-3 ${iconColor} shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">${iconSvg}</svg>
+                <span class="font-bold text-sm">${message}</span>
+            `;
+
+            container.appendChild(toast);
+
+            // Animate In
+            setTimeout(() => {
+                toast.classList.remove('-translate-y-10', 'opacity-0');
+            }, 10);
+
+            // Animate Out & Remove
+            setTimeout(() => {
+                toast.classList.add('-translate-y-10', 'opacity-0');
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 3500); // Tampil selama 3.5 detik
+        }
+
+        // FUNGSI UNTUK INTERAKSI KARTU METODE PEMBAYARAN
+        function selectPayment(method) {
+            document.getElementById('payment_method').value = method;
+            const cashArea = document.getElementById('cash_input_area');
+
+            // Elemen Cash
+            const btnCash = document.getElementById('btn-cash');
+            const iconCash = document.getElementById('icon-cash');
+            const textCash = document.getElementById('text-cash');
+
+            // Elemen QRIS
+            const btnQris = document.getElementById('btn-qris');
+            const iconQris = document.getElementById('icon-qris');
+            const textQris = document.getElementById('text-qris');
+
+            // Reset Kelas Semua Button
+            [btnCash, btnQris].forEach(btn => btn.className =
+                "flex flex-col items-center justify-center p-3 border-2 border-gray-100 bg-gray-50 rounded-xl hover:border-gray-300 transition-all focus:outline-none group"
+                );
+            [iconCash, iconQris].forEach(icon => icon.className = "w-6 h-6 mb-1.5 text-gray-400 transition-colors");
+            [textCash, textQris].forEach(text => text.className = "text-xs font-bold text-gray-600");
+
+            if (method === 'cash') {
+                btnCash.className =
+                    "flex flex-col items-center justify-center p-3 border-2 border-emerald-500 bg-emerald-50 rounded-xl shadow-sm transition-all focus:outline-none scale-105";
+                iconCash.className = "w-6 h-6 mb-1.5 text-emerald-600 transition-colors";
+                textCash.className = "text-xs font-bold text-emerald-700";
+
+                cashArea.classList.remove('hidden');
+                setTimeout(() => document.getElementById('uang_bayar').focus(), 100);
+            } else {
+                btnQris.className =
+                    "flex flex-col items-center justify-center p-3 border-2 border-blue-500 bg-blue-50 rounded-xl shadow-sm transition-all focus:outline-none scale-105";
+                iconQris.className = "w-6 h-6 mb-1.5 text-blue-600 transition-colors";
+                textQris.className = "text-xs font-bold text-blue-700";
+
+                cashArea.classList.add('hidden');
+                document.getElementById('uang_bayar').value = '';
+                calculateChange();
+            }
+        }
+
+        // --- SISA FUNGSI CART ---
         function addItem(id, nama, harga) {
             if (!cart[id]) {
                 cart[id] = {
@@ -247,19 +363,6 @@
         function updateNote(id, val) {
             if (cart[id]) {
                 cart[id].catatan = val;
-            }
-        }
-
-        function toggleCashInput() {
-            const method = document.getElementById('payment_method').value;
-            const cashArea = document.getElementById('cash_input_area');
-            if (method === 'cash') {
-                cashArea.classList.remove('hidden');
-                document.getElementById('uang_bayar').focus();
-            } else {
-                cashArea.classList.add('hidden');
-                document.getElementById('uang_bayar').value = '';
-                calculateChange();
             }
         }
 
@@ -311,21 +414,22 @@
         }
 
         function checkout(receipt) {
+            // MENGGUNAKAN TOAST NOTIFICATION MODERN SEBAGAI PENGGANTI ALERT
             if (Object.keys(cart).length === 0) {
-                alert('Pilih menu terlebih dahulu!');
+                showToast('Pilih menu terlebih dahulu sebelum membayar!', 'error');
                 return;
             }
 
             const payment = document.getElementById('payment_method').value;
             if (!payment) {
-                alert('Silakan pilih metode pembayaran!');
+                showToast('Silakan pilih salah satu Metode Pembayaran!', 'error');
                 return;
             }
 
             if (payment === 'cash') {
                 const bayar = parseInt(document.getElementById('uang_bayar').value) || 0;
                 if (bayar < grandTotal) {
-                    alert('Uang pembayaran tunai kurang dari total tagihan!');
+                    showToast('Nominal uang tunai kurang dari total tagihan!', 'error');
                     return;
                 }
             }
@@ -352,19 +456,20 @@
         @if (session('snap_token'))
             snap.pay('{{ session('snap_token') }}', {
                 onSuccess: function(result) {
-                    alert("Pembayaran QRIS Berhasil!");
-
-                    window.location.href =
-                        "{{ url('/kasir/qris-success') }}/{{ session('order_id') }}?with_receipt={{ session('with_receipt') }}";
+                    showToast("Pembayaran QRIS Berhasil!", "success");
+                    setTimeout(() => {
+                        window.location.href =
+                            "{{ url('/kasir/qris-success') }}/{{ session('order_id') }}?with_receipt={{ session('with_receipt') }}";
+                    }, 1000);
                 },
                 onPending: function(result) {
-                    alert("Menunggu pembayaran Anda diselesaikan.");
+                    showToast("Menunggu pembayaran Anda diselesaikan.", "warning");
                 },
                 onError: function(result) {
-                    alert("Pembayaran gagal. Silakan coba lagi.");
+                    showToast("Pembayaran QRIS gagal. Silakan coba lagi.", "error");
                 },
                 onClose: function() {
-                    alert('Anda menutup popup tanpa menyelesaikan pembayaran.');
+                    showToast("Popup ditutup tanpa menyelesaikan pembayaran.", "warning");
                 }
             });
         @endif

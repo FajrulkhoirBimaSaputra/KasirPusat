@@ -31,7 +31,6 @@
                     </svg>
                     {{ Auth::user()->name }}
                     <span class="text-gray-300">|</span>
-
                     <span class="text-gray-500 font-medium">Buka: {{ $waktuBukaShift->format('d M Y • H:i') }}
                         WIB</span>
                 </div>
@@ -46,38 +45,89 @@
                     </svg>
                     Manajemen Kas
                 </a>
-                {{-- Form Rahasia untuk Tutup Shift --}}
-                <form id="form-tutup-shift" action="{{ route('kasir.tutup-shift') }}" method="POST" class="hidden">
-                    @csrf
-                    {{-- Mengirimkan data total uang laci agar tercatat di database saat ditarik --}}
-                    <input type="hidden" name="expected_cash" value="{{ $jumlahTunaiDiharapkan }}">
-                </form>
 
-                <button type="button" onclick="prosesTutupShift()"
-                    class="flex-1 sm:flex-none inline-flex justify-center items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-xl font-bold text-sm shadow-sm transition-all">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                    </svg>
-                    Cetak & Tutup Shift
-                </button>
+                {{-- DI SINI BAGIAN BARU: IMPLEMENTASI CUSTOM MODAL DENGAN ALPINE.JS --}}
+                <div x-data="{ showConfirmModal: false }" class="flex-1 sm:flex-none">
 
-                {{-- Script Print & Auto-Submit --}}
+                    {{-- Form Rahasia untuk Tutup Shift --}}
+                    <form id="form-tutup-shift" action="{{ route('kasir.tutup-shift') }}" method="POST" class="hidden">
+                        @csrf
+                        <input type="hidden" name="expected_cash" value="{{ $jumlahTunaiDiharapkan }}">
+                    </form>
+
+                    {{-- Tombol Pemicu Modal --}}
+                    <button type="button" @click="showConfirmModal = true"
+                        class="w-full inline-flex justify-center items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-xl font-bold text-sm shadow-sm transition-all">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                        </svg>
+                        Cetak & Tutup Shift
+                    </button>
+
+                    {{-- POP-UP MODAL BOX --}}
+                    <div x-show="showConfirmModal"
+                        class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-0" x-cloak>
+                        {{-- Background Overlay Gelap Halus --}}
+                        <div x-show="showConfirmModal" x-transition:enter="ease-out duration-300"
+                            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                            x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100"
+                            x-transition:leave-end="opacity-0" class="fixed inset-0 bg-gray-900/70 backdrop-blur-sm"
+                            @click="showConfirmModal = false"></div>
+
+                        {{-- Box Panel Modal --}}
+                        <div x-show="showConfirmModal" x-transition:enter="ease-out duration-300"
+                            x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                            x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                            x-transition:leave="ease-in duration-200"
+                            x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                            x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                            class="relative bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all">
+
+                            <div class="h-2 bg-red-500 w-full"></div>
+
+                            <div class="p-6 sm:p-8 text-center">
+                                <div
+                                    class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-50 mb-5 border-4 border-red-100">
+                                    <svg class="h-8 w-8 text-red-500" fill="none" viewBox="0 0 24 24"
+                                        stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                </div>
+
+                                <h3 class="text-xl font-black text-gray-900 mb-2">Akhiri Shift Sekarang?</h3>
+                                <p class="text-sm text-gray-500 font-medium leading-relaxed mb-6">
+                                    Setelah menekan tombol ini, mesin kasir akan mencetak laporan dan <b>akses menu akan
+                                        otomatis dikunci</b>. Anda harus membuka shift baru untuk bertransaksi kembali.
+                                </p>
+
+                                <div class="flex flex-col sm:flex-row gap-3">
+                                    <button type="button" @click="showConfirmModal = false"
+                                        class="w-full inline-flex justify-center items-center px-4 py-3 bg-white border-2 border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 rounded-xl font-bold text-sm transition-colors focus:outline-none">
+                                        Batal
+                                    </button>
+
+                                    <button type="button" onclick="prosesTutupShiftModal()"
+                                        class="w-full inline-flex justify-center items-center px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-sm shadow-md shadow-red-600/20 transition-colors focus:outline-none">
+                                        Ya, Cetak & Tutup
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Script Print Terpisah di Bawah Modal --}}
                 <script>
-                    function prosesTutupShift() {
-                        if (confirm(
-                                'PERINGATAN: Apakah Anda yakin ingin menutup shift sekarang? Akses menu kasir akan dikunci setelah ini.'
-                                )) {
-                            // 1. Munculkan jendela Print (Struk/Laporan)
-                            window.print();
-
-                            // 2. Beri jeda 1 detik agar print dialog muncul, lalu submit form untuk mengunci shift
-                            setTimeout(() => {
-                                document.getElementById('form-tutup-shift').submit();
-                            }, 1000);
-                        }
+                    function prosesTutupShiftModal() {
+                        window.print();
+                        setTimeout(() => {
+                            document.getElementById('form-tutup-shift').submit();
+                        }, 1000);
                     }
                 </script>
+
             </div>
         </div>
 
@@ -100,7 +150,8 @@
                     <div class="space-y-4">
                         <div class="flex justify-between items-center text-sm">
                             <span class="font-semibold text-gray-500">Modal Awal</span>
-                            <span class="font-bold text-gray-800">Rp {{ number_format($modalAwal, 0, ',', '.') }}</span>
+                            <span class="font-bold text-gray-800">Rp
+                                {{ number_format($modalAwal, 0, ',', '.') }}</span>
                         </div>
                         <div class="flex justify-between items-center text-sm">
                             <span class="font-semibold text-gray-500">Pembayaran Tunai (Masuk)</span>
@@ -126,7 +177,8 @@
                     </div>
 
                     <div class="mt-8 p-4 bg-primary/10 border border-primary/20 rounded-xl text-center">
-                        <p class="text-xs font-bold text-primary uppercase tracking-wider mb-1">Uang Fisik Diharapkan di
+                        <p class="text-xs font-bold text-primary uppercase tracking-wider mb-1">Uang Fisik Diharapkan
+                            di
                             Laci</p>
                         <p class="text-3xl font-black text-primary leading-tight">Rp
                             {{ number_format($jumlahTunaiDiharapkan, 0, ',', '.') }}</p>
@@ -209,7 +261,24 @@
 
     </div>
 
+    <script>
+        function prosesTutupShiftModal() {
+            // 1. Buka halaman struk di tab/jendela baru (Otomatis akan memicu print di tab tersebut)
+            window.open("{{ route('kasir.struk-shift') }}", "_blank");
+
+            // 2. Beri jeda 0.5 detik, lalu submit form tutup shift di halaman utama ini
+            setTimeout(() => {
+                document.getElementById('form-tutup-shift').submit();
+            }, 500);
+        }
+    </script>
+
     <style>
+        /* Mencegah modal berkedip sebelum Alpine.js ter-load sempurna */
+        [x-cloak] {
+            display: none !important;
+        }
+
         @media print {
             body {
                 background-color: white !important;

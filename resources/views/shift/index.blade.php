@@ -11,8 +11,13 @@
         </div>
     </x-slot>
 
+    {{-- CONTAINER UNTUK TOAST NOTIFICATION VALIDASI JS --}}
+    <div id="toast-container"
+        class="fixed top-5 left-1/2 transform -translate-x-1/2 z-[100] flex flex-col gap-2 pointer-events-none"></div>
+
     <div>
 
+        {{-- ALERT SUCCESS SUBMIT PHP BEBAS REFRESH --}}
         @if (session('success'))
             <div id="alert-success"
                 class="mb-6 flex items-center p-4 text-emerald-800 rounded-xl bg-emerald-50 border border-emerald-200 shadow-sm transition-all duration-500"
@@ -224,14 +229,42 @@
     <style>
         .calendar-cell.selected {
             background-color: rgb(var(--color-primary) / 0.1) !important;
-            /* Warna bg-primary/10 */
             box-shadow: inset 0 0 0 2px rgb(var(--color-primary)) !important;
-            /* Outline tebal */
             z-index: 20;
         }
     </style>
 
     <script>
+        // FUNGSI UNTUK MENAMPILKAN TOAST NOTIFICATION MODERN (MENGGANTIKAN ALERT)
+        function showToast(message) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+
+            toast.className =
+                `transform transition-all duration-300 -translate-y-10 opacity-0 flex items-center p-4 bg-red-50 border border-red-200 text-red-800 rounded-2xl shadow-lg pointer-events-auto`;
+            toast.innerHTML = `
+                <svg class="w-6 h-6 mr-3 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span class="font-bold text-sm">${message}</span>
+            `;
+
+            container.appendChild(toast);
+
+            // Muncul turun
+            setTimeout(() => {
+                toast.classList.remove('-translate-y-10', 'opacity-0');
+            }, 10);
+
+            // Hilang naik & hapus
+            setTimeout(() => {
+                toast.classList.add('-translate-y-10', 'opacity-0');
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 3500);
+        }
+
         const selectedDates = new Set();
 
         document.querySelectorAll('.calendar-cell').forEach(cell => {
@@ -256,13 +289,15 @@
             e.preventDefault();
             const kasir = document.getElementById('kasir').value;
 
+            // Validasi menggunakan Toast Custom (Bukan Alert)
             if (!kasir) {
-                alert('Silakan pilih nama kasir terlebih dahulu!');
+                showToast('Silakan pilih nama kasir terlebih dahulu!');
+                document.getElementById('kasir').focus();
                 return;
             }
 
             if (selectedDates.size === 0) {
-                alert('Pilih minimal satu tanggal pada kalender!');
+                showToast('Pilih minimal satu tanggal pada kalender!');
                 return;
             }
 
@@ -280,12 +315,12 @@
             e.target.closest('form').submit();
         }
 
-        {{-- ALERT HILANG OTOMATIS --}}
+        {{-- ALERT SUCCESS PHP (BEKAS SAVE) MENGHILANG OTOMATIS --}}
         setTimeout(() => {
             const alert = document.getElementById('alert-success');
             if (alert) {
-                alert.style.opacity = '0';
-                setTimeout(() => alert.remove(), 500); // Hapus elemen setelah transisi selesai
+                alert.classList.add('opacity-0', '-translate-y-4'); // Efek fade out + geser ke atas
+                setTimeout(() => alert.remove(), 500);
             }
         }, 3000);
     </script>

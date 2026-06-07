@@ -56,23 +56,41 @@ class LaporanController extends Controller
             ];
 
             // 2. Ambil data SEMUA produk (tanpa limit 5) agar lebih transparan
-            $produkPerBulan[$namaBulan] = OrderItem::with('menu')
+            // 2. Ambil data produk dan kelompokkan per HARI (Tanggal)
+            $items = OrderItem::with('menu')
                 ->whereHas('order', function ($q) use ($m, $tahunTerpilih) {
                     $q->whereMonth('created_at', $m)
                         ->whereYear('created_at', $tahunTerpilih)
                         ->where('payment_status', 'paid');
                 })
-                ->select('menu_id', DB::raw('SUM(qty) as total_qty'), DB::raw('SUM(subtotal) as total_pendapatan'))
-                ->groupBy('menu_id')
-                ->orderByDesc('total_qty')
-                ->get()
-                ->map(function ($item) {
-                    return [
-                        'nama' => $item->menu->nama ?? 'Produk Terhapus',
-                        'qty' => $item->total_qty,
-                        'total' => $item->total_pendapatan // Kirim angka mentah, diformat di Alpine JS
-                    ];
-                });
+                ->select(
+                    DB::raw('DATE(created_at) as tanggal'),
+                    'menu_id',
+                    DB::raw('SUM(qty) as total_qty'),
+                    DB::raw('SUM(subtotal) as total_pendapatan')
+                )
+                ->groupBy('tanggal', 'menu_id')
+                ->orderByDesc('tanggal') // Urutkan dari tanggal terbaru ke terlama
+                ->orderByDesc('total_qty') // Lalu urutkan berdasarkan yang paling laris
+                ->get();
+
+            // Format data agar menjadi array bersarang: ['01 Januari 2026' => [ item1, item2 ]]
+            $formattedItems = [];
+            foreach ($items as $item) {
+                $tglIndo = Carbon::parse($item->tanggal)->translatedFormat('d F Y');
+
+                if (!isset($formattedItems[$tglIndo])) {
+                    $formattedItems[$tglIndo] = [];
+                }
+
+                $formattedItems[$tglIndo][] = [
+                    'nama' => $item->menu->nama ?? 'Produk Terhapus',
+                    'qty' => $item->total_qty,
+                    'total' => $item->total_pendapatan
+                ];
+            }
+
+            $produkPerBulan[$namaBulan] = $formattedItems;
         }
 
         return view('admin.laporan.bulanan', compact(
@@ -86,9 +104,18 @@ class LaporanController extends Controller
 
     public function exportExcel(Request $request)
     {
-        $tahun = $request->query('tahun', Carbon::now()->year);
-        $namaFile = 'Laporan_Penjualan_' . $tahun . '.xlsx';
+        // Validasi input range tanggal
+        $request->validate([
+            'tanggal_mulai' => 'required|date',
+            'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
+        ]);
 
-        return Excel::download(new LaporanBulananExport($tahun), $namaFile);
+        $start = $request->query('tanggal_mulai');
+        $end = $request->query('tanggal_selesai');
+
+        // Penamaan file dinamis berdasarkan range tanggal
+        $namaFile = "Laporan_Penjualan_{$start}_to_{$end}.xlsx";
+
+        return Excel::download(new LaporanBulananExport($start, $end), $namaFile);
     }
 }

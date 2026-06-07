@@ -11,18 +11,20 @@ class LaporanBulananExport implements WithMultipleSheets
 {
     use Exportable;
 
-    protected $tahun;
+    protected $start;
+    protected $end;
 
-    public function __construct($tahun)
+    public function __construct($start, $end)
     {
-        $this->tahun = $tahun;
+        $this->start = $start;
+        $this->end = $end;
     }
 
     public function sheets(): array
     {
         return [
-            new TransaksiBulanSheet($this->tahun),
-            new ProdukBulanSheet($this->tahun),
+            new TransaksiBulanSheet($this->start, $this->end),
+            new ProdukBulanSheet($this->start, $this->end),
         ];
     }
 }

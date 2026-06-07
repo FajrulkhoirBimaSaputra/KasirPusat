@@ -11,7 +11,17 @@
         </div>
     </x-slot>
 
-    <div>
+    {{-- BUNGKUS SELURUH HALAMAN DENGAN ALPINE.JS UNTUK MODAL GLOBAL --}}
+    <div x-data="{
+        deleteModalOpen: false,
+        deleteUrl: '',
+        deleteName: '',
+        openDeleteModal(url, name) {
+            this.deleteUrl = url;
+            this.deleteName = name;
+            this.deleteModalOpen = true;
+        }
+    }">
 
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
@@ -29,8 +39,14 @@
             </a>
         </div>
 
+        {{-- UI BARU: ALERT SUCCESS AUTO-HIDE --}}
         @if (session('success'))
-            <div class="mb-6 flex items-center p-4 mb-4 text-emerald-800 rounded-xl bg-emerald-50 border border-emerald-200"
+            <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)"
+                x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0 -translate-y-4" x-transition:enter-end="opacity-100 translate-y-0"
+                x-transition:leave="transition ease-in duration-200"
+                x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-4"
+                class="mb-6 flex items-center p-4 text-emerald-800 rounded-xl bg-emerald-50 border border-emerald-200 shadow-sm"
                 role="alert">
                 <svg class="flex-shrink-0 w-5 h-5 mr-3 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd"
@@ -43,6 +59,7 @@
             </div>
         @endif
 
+        {{-- MODE MOBILE --}}
         <div class="block md:hidden space-y-4">
             @forelse($menus as $menu)
                 <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex gap-4">
@@ -66,25 +83,25 @@
 
                             <div class="flex items-center gap-1.5">
                                 <a href="{{ route('menu.edit', $menu) }}"
-                                    class="p-1.5 text-blue-500 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors">
+                                    class="p-1.5 text-blue-500 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                                    title="Edit">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
                                         </path>
                                     </svg>
                                 </a>
-                                <form action="{{ route('menu.destroy', $menu) }}" method="POST" class="inline m-0 p-0"
-                                    onsubmit="return confirm('Hapus menu ini?');">
-                                    @csrf @method('DELETE')
-                                    <button type="submit"
-                                        class="p-1.5 text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-lg transition-colors">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
-                                            </path>
-                                        </svg>
-                                    </button>
-                                </form>
+                                {{-- Tombol Pemanggil Modal Hapus (Mobile) --}}
+                                <button type="button"
+                                    @click="openDeleteModal('{{ route('menu.destroy', $menu) }}', '{{ addslashes($menu->nama) }}')"
+                                    class="p-1.5 text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
+                                    title="Hapus">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                        </path>
+                                    </svg>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -96,6 +113,7 @@
             @endforelse
         </div>
 
+        {{-- MODE DESKTOP --}}
         <div class="hidden md:block bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-100">
@@ -153,22 +171,18 @@
                                             </svg>
                                         </a>
 
-                                        <form action="{{ route('menu.destroy', $menu) }}" method="POST"
-                                            class="inline m-0 p-0"
-                                            onsubmit="return confirm('Apakah Anda yakin ingin menghapus menu ini?');">
-                                            @csrf @method('DELETE')
-                                            <button type="submit"
-                                                class="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-2 rounded-lg transition-colors"
-                                                title="Hapus Menu">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                                                    viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
-                                                    </path>
-                                                </svg>
-                                            </button>
-                                        </form>
+                                        {{-- Tombol Pemanggil Modal Hapus (Desktop) --}}
+                                        <button type="button"
+                                            @click="openDeleteModal('{{ route('menu.destroy', $menu) }}', '{{ addslashes($menu->nama) }}')"
+                                            class="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-2 rounded-lg transition-colors"
+                                            title="Hapus Menu">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                                </path>
+                                            </svg>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -196,5 +210,70 @@
             @endif
         </div>
 
+        {{-- UI BARU: GLOBAL MODAL KONFIRMASI HAPUS MENU --}}
+        <div x-show="deleteModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-0"
+            x-cloak>
+            {{-- Background Gelap Blur --}}
+            <div x-show="deleteModalOpen" x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0" class="fixed inset-0 bg-gray-900/70 backdrop-blur-sm"
+                @click="deleteModalOpen = false"></div>
+
+            {{-- Kotak Modal --}}
+            <div x-show="deleteModalOpen" x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                x-transition:leave="ease-in duration-200"
+                x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                class="relative bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all">
+
+                {{-- Header Garis Merah --}}
+                <div class="h-2 bg-red-500 w-full"></div>
+
+                <div class="p-6 sm:p-8 text-center">
+                    {{-- Ikon Peringatan Tempat Sampah --}}
+                    <div
+                        class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-50 mb-5 border-4 border-red-100">
+                        <svg class="h-8 w-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                    </div>
+
+                    <h3 class="text-xl font-black text-gray-900 mb-2">Hapus Produk?</h3>
+                    <p class="text-sm text-gray-500 font-medium leading-relaxed mb-6">
+                        Apakah Anda yakin ingin menghapus produk <br>
+                        <b class="text-gray-800 text-base" x-text="deleteName"></b> dari katalog?<br>
+                        Aksi ini tidak dapat dibatalkan.
+                    </p>
+
+                    {{-- Form Eksekusi Delete --}}
+                    <form :action="deleteUrl" method="POST" class="flex flex-col sm:flex-row gap-3">
+                        @csrf
+                        @method('DELETE')
+
+                        <button type="button" @click="deleteModalOpen = false"
+                            class="w-full inline-flex justify-center items-center px-4 py-3 bg-white border-2 border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 rounded-xl font-bold text-sm transition-colors focus:outline-none">
+                            Batal
+                        </button>
+
+                        <button type="submit"
+                            class="w-full inline-flex justify-center items-center px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-sm shadow-md shadow-red-600/20 transition-colors focus:outline-none">
+                            Ya, Hapus Produk
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
     </div>
+
+    <style>
+        /* Mencegah modal berkedip sebelum Alpine.js ter-load sempurna */
+        [x-cloak] {
+            display: none !important;
+        }
+    </style>
 </x-app-layout>
