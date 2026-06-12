@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ config('app.name', 'Kasir Pusat') }}</title>
@@ -57,8 +58,8 @@
 
             </header>
 
-            <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-gray-50">
-                <div class="max-w-7xl mx-auto">
+            <main class="flex-1 overflow-y-auto p-0 sm:p-6 lg:p-8 bg-gray-50">
+                <div class="w-full max-w-7xl mx-auto">
                     {{ $slot }}
                 </div>
             </main>
