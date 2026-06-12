@@ -74,18 +74,18 @@
                         </div>
                     </div>
 
-                    {{-- Grid Menu (3 Kolom di Mobile, lebih ringkas) --}}
-                    <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-4 gap-2 sm:gap-4">
+                    {{-- Grid Menu Ultra-Ringkas (3 Kolom di Mobile) --}}
+                    <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-4 gap-1.5 sm:gap-4">
                         @foreach ($menus as $menu)
                             <div x-show="activeCategory === 'semua' || activeCategory === '{{ $menu->jenis }}'"
                                 x-transition:enter="transition ease-out duration-200"
                                 x-transition:enter-start="opacity-0 scale-95"
                                 x-transition:enter-end="opacity-100 scale-100"
                                 onclick="addItem({{ $menu->id }}, '{{ addslashes($menu->nama) }}', {{ $menu->harga }})"
-                                class="bg-white border border-gray-200 rounded-xl sm:rounded-2xl p-1.5 sm:p-3 text-center cursor-pointer hover:border-primary hover:shadow-md transition-all duration-200 active:scale-95 group flex flex-col">
+                                class="bg-white border border-gray-200 rounded-lg sm:rounded-2xl p-1.5 sm:p-3 text-center cursor-pointer hover:border-primary hover:shadow-md transition-all duration-200 active:scale-95 flex flex-col group">
 
                                 <div
-                                    class="w-full aspect-square bg-gray-50 rounded-lg sm:rounded-xl mb-1.5 sm:mb-3 flex items-center justify-center overflow-hidden border border-gray-100 relative">
+                                    class="w-full aspect-square bg-gray-50 rounded-md sm:rounded-xl mb-1.5 sm:mb-3 flex items-center justify-center overflow-hidden border border-gray-100 relative">
                                     @if ($menu->image_path)
                                         <img src="{{ asset('storage/' . $menu->image_path) }}"
                                             alt="{{ $menu->nama }}"
@@ -101,10 +101,10 @@
                                     @endif
                                 </div>
                                 <h3
-                                    class="font-bold text-gray-800 text-[10px] sm:text-sm leading-tight h-8 sm:h-10 flex items-center justify-center overflow-hidden">
+                                    class="font-bold text-gray-800 text-[9px] sm:text-sm leading-tight h-7 sm:h-10 flex items-center justify-center overflow-hidden">
                                     {{ $menu->nama }}
                                 </h3>
-                                <p class="text-primary font-bold mt-auto text-[11px] sm:text-sm">
+                                <p class="text-primary font-bold mt-1 text-[10px] sm:text-sm">
                                     Rp {{ number_format($menu->harga, 0, ',', '.') }}
                                 </p>
                             </div>
@@ -117,9 +117,9 @@
                 {{-- ======================== --}}
                 <div class="w-full lg:w-1/3 mt-2 lg:mt-0">
                     <div
-                        class="bg-white border border-gray-100 rounded-2xl p-4 sm:p-5 shadow-sm lg:sticky lg:top-6 flex flex-col max-h-[85vh] sm:max-h-[90vh]">
+                        class="bg-white border border-gray-100 rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-sm lg:sticky lg:top-6 flex flex-col max-h-[85vh] sm:max-h-[90vh]">
 
-                        <div class="flex items-center justify-between mb-3 sm:mb-4 shrink-0">
+                        <div class="flex items-center justify-between mb-2 sm:mb-4 shrink-0">
                             <h3 class="font-bold text-base sm:text-lg text-gray-800">Keranjang</h3>
                             <span
                                 class="bg-primary/10 text-primary text-[10px] sm:text-xs font-bold py-1 px-2 rounded-lg"
@@ -140,71 +140,66 @@
                             </div>
                         </div>
 
-                        {{-- Area Pembayaran --}}
-                        <div class="border-t border-gray-100 mt-3 pt-3 sm:mt-4 sm:pt-4 shrink-0">
+                        {{-- Area Pembayaran Ultra-Ringkas --}}
+                        <div class="border-t border-gray-100 mt-2 pt-2 sm:mt-4 sm:pt-4 shrink-0">
 
-                            {{-- UI BARU: Visual Card Payment Method --}}
-                            <div class="mb-4">
+                            <div class="mb-3">
                                 <label
-                                    class="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 block">Metode
+                                    class="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Metode
                                     Pembayaran</label>
                                 <input type="hidden" name="payment_method" id="payment_method" value="">
 
-                                <div class="grid grid-cols-2 gap-2 sm:gap-3">
+                                <div class="grid grid-cols-2 gap-1.5 sm:gap-3">
                                     {{-- Opsi Tunai --}}
                                     <button type="button" id="btn-cash" onclick="selectPayment('cash')"
-                                        class="flex flex-col items-center justify-center p-2 sm:p-3 border-2 border-gray-100 bg-gray-50 rounded-xl hover:border-emerald-400 hover:bg-emerald-50 transition-all focus:outline-none group">
-                                        <svg class="w-5 h-5 sm:w-6 sm:h-6 mb-1 sm:mb-1.5 text-gray-400 group-hover:text-emerald-500 transition-colors"
+                                        class="flex flex-col items-center justify-center p-2 border-2 border-gray-100 bg-gray-50 rounded-lg hover:border-emerald-400 hover:bg-emerald-50 transition-all focus:outline-none group">
+                                        <svg class="w-5 h-5 sm:w-6 sm:h-6 mb-1 text-gray-400 group-hover:text-emerald-500 transition-colors"
                                             id="icon-cash" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                                         </svg>
-                                        <span
-                                            class="text-[10px] sm:text-xs font-bold text-gray-600 group-hover:text-emerald-700"
+                                        <span class="text-[10px] font-bold text-gray-600 group-hover:text-emerald-700"
                                             id="text-cash">Tunai / Cash</span>
                                     </button>
 
                                     {{-- Opsi QRIS --}}
                                     <button type="button" id="btn-qris" onclick="selectPayment('qris')"
-                                        class="flex flex-col items-center justify-center p-2 sm:p-3 border-2 border-gray-100 bg-gray-50 rounded-xl hover:border-blue-400 hover:bg-blue-50 transition-all focus:outline-none group">
-                                        <svg class="w-5 h-5 sm:w-6 sm:h-6 mb-1 sm:mb-1.5 text-gray-400 group-hover:text-blue-500 transition-colors"
+                                        class="flex flex-col items-center justify-center p-2 border-2 border-gray-100 bg-gray-50 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-all focus:outline-none group">
+                                        <svg class="w-5 h-5 sm:w-6 sm:h-6 mb-1 text-gray-400 group-hover:text-blue-500 transition-colors"
                                             id="icon-qris" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
                                         </svg>
-                                        <span
-                                            class="text-[10px] sm:text-xs font-bold text-gray-600 group-hover:text-blue-700"
+                                        <span class="text-[10px] font-bold text-gray-600 group-hover:text-blue-700"
                                             id="text-qris">QRIS (Digital)</span>
                                     </button>
                                 </div>
                             </div>
 
                             <div id="cash_input_area"
-                                class="hidden mb-3 sm:mb-4 p-3 sm:p-4 bg-emerald-50 border border-emerald-100 rounded-xl space-y-2 sm:space-y-3">
+                                class="hidden mb-3 sm:mb-4 p-2 sm:p-4 bg-emerald-50 border border-emerald-100 rounded-lg space-y-2">
                                 <div>
-                                    <label class="text-[10px] sm:text-xs font-bold text-emerald-800 block mb-1">Uang
-                                        Diterima dari
-                                        Pelanggan (Rp)</label>
+                                    <label class="text-[9px] sm:text-xs font-bold text-emerald-800 block mb-1">Uang
+                                        Diterima dari Pelanggan (Rp)</label>
                                     <input type="number" name="uang_bayar" id="uang_bayar"
                                         oninput="calculateChange()"
-                                        class="w-full border-emerald-200 shadow-inner rounded-lg p-2 sm:p-2.5 text-sm font-bold text-gray-900 focus:ring-emerald-500 focus:border-emerald-500"
-                                        placeholder="Ketik nominal uang...">
+                                        class="w-full border-emerald-200 shadow-inner rounded-md p-1.5 sm:p-2.5 text-[10px] sm:text-sm font-bold text-gray-900 focus:ring-emerald-500 focus:border-emerald-500"
+                                        placeholder="Nominal uang...">
                                 </div>
                                 <div
-                                    class="flex justify-between items-center text-xs sm:text-sm pt-2 border-t border-emerald-200/50">
+                                    class="flex justify-between items-center text-[10px] sm:text-sm pt-1.5 border-t border-emerald-200/50">
                                     <span class="font-bold text-emerald-700">Kembalian:</span>
-                                    <span class="font-black text-emerald-600 text-base sm:text-lg">Rp <span
+                                    <span class="font-black text-emerald-600 text-sm sm:text-lg">Rp <span
                                             id="uang_kembali">0</span></span>
                                 </div>
                             </div>
 
                             <div
-                                class="flex justify-between items-end mb-4 sm:mb-5 bg-gray-800 p-3 sm:p-4 rounded-xl shadow-inner">
+                                class="flex justify-between items-end mb-3 sm:mb-5 bg-gray-800 p-2.5 sm:p-4 rounded-lg shadow-inner">
                                 <span
-                                    class="text-gray-400 font-bold uppercase text-[10px] sm:text-xs tracking-wider">Total
-                                    Tagihan</span>
-                                <div class="text-2xl sm:text-3xl font-black text-white">
-                                    <span class="text-sm sm:text-base font-bold text-gray-400 mr-1">Rp</span><span
+                                    class="text-gray-400 font-bold uppercase text-[9px] sm:text-xs tracking-wider">Total</span>
+                                <div class="text-xl sm:text-3xl font-black text-white">
+                                    <span class="text-[10px] sm:text-base font-bold text-gray-400 mr-1">Rp</span><span
                                         id="total">0</span>
                                 </div>
                             </div>
@@ -212,13 +207,13 @@
                             <input type="hidden" name="with_receipt" id="with_receipt">
                             <div id="items-input"></div>
 
-                            <div class="grid grid-cols-2 gap-2 sm:gap-3">
+                            <div class="grid grid-cols-2 gap-1.5 sm:gap-3">
                                 <button type="button" onclick="checkout(0)"
-                                    class="w-full bg-white border-2 border-gray-200 hover:bg-gray-50 hover:border-gray-300 text-gray-700 py-2 sm:py-3 rounded-xl font-bold transition-all text-xs sm:text-sm">
+                                    class="w-full bg-white border-2 border-gray-200 hover:bg-gray-50 hover:border-gray-300 text-gray-700 py-1.5 sm:py-3 rounded-lg font-bold transition-all text-[10px] sm:text-sm">
                                     Hanya Bayar
                                 </button>
                                 <button type="button" onclick="checkout(1)"
-                                    class="w-full bg-primary hover:bg-primary-dark text-white py-2 sm:py-3 rounded-xl font-bold transition-all shadow-md shadow-primary/20 text-xs sm:text-sm flex items-center justify-center gap-1.5">
+                                    class="w-full bg-primary hover:bg-primary-dark text-white py-1.5 sm:py-3 rounded-lg font-bold transition-all shadow-md shadow-primary/20 text-[10px] sm:text-sm flex items-center justify-center gap-1">
                                     <svg class="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor"
                                         viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -313,25 +308,25 @@
             const textQris = document.getElementById('text-qris');
 
             [btnCash, btnQris].forEach(btn => btn.className =
-                "flex flex-col items-center justify-center p-2 sm:p-3 border-2 border-gray-100 bg-gray-50 rounded-xl hover:border-gray-300 transition-all focus:outline-none group"
+                "flex flex-col items-center justify-center p-2 border-2 border-gray-100 bg-gray-50 rounded-lg hover:border-gray-300 transition-all focus:outline-none group"
             );
             [iconCash, iconQris].forEach(icon => icon.className =
-                "w-5 h-5 sm:w-6 sm:h-6 mb-1 sm:mb-1.5 text-gray-400 transition-colors");
-            [textCash, textQris].forEach(text => text.className = "text-[10px] sm:text-xs font-bold text-gray-600");
+                "w-5 h-5 sm:w-6 sm:h-6 mb-1 text-gray-400 transition-colors");
+            [textCash, textQris].forEach(text => text.className = "text-[10px] font-bold text-gray-600");
 
             if (method === 'cash') {
                 btnCash.className =
-                    "flex flex-col items-center justify-center p-2 sm:p-3 border-2 border-emerald-500 bg-emerald-50 rounded-xl shadow-sm transition-all focus:outline-none scale-105";
-                iconCash.className = "w-5 h-5 sm:w-6 sm:h-6 mb-1 sm:mb-1.5 text-emerald-600 transition-colors";
-                textCash.className = "text-[10px] sm:text-xs font-bold text-emerald-700";
+                    "flex flex-col items-center justify-center p-2 border-2 border-emerald-500 bg-emerald-50 rounded-lg shadow-sm transition-all focus:outline-none scale-105";
+                iconCash.className = "w-5 h-5 sm:w-6 sm:h-6 mb-1 text-emerald-600 transition-colors";
+                textCash.className = "text-[10px] font-bold text-emerald-700";
 
                 cashArea.classList.remove('hidden');
                 setTimeout(() => document.getElementById('uang_bayar').focus(), 100);
             } else {
                 btnQris.className =
-                    "flex flex-col items-center justify-center p-2 sm:p-3 border-2 border-blue-500 bg-blue-50 rounded-xl shadow-sm transition-all focus:outline-none scale-105";
-                iconQris.className = "w-5 h-5 sm:w-6 sm:h-6 mb-1 sm:mb-1.5 text-blue-600 transition-colors";
-                textQris.className = "text-[10px] sm:text-xs font-bold text-blue-700";
+                    "flex flex-col items-center justify-center p-2 border-2 border-blue-500 bg-blue-50 rounded-lg shadow-sm transition-all focus:outline-none scale-105";
+                iconQris.className = "w-5 h-5 sm:w-6 sm:h-6 mb-1 text-blue-600 transition-colors";
+                textQris.className = "text-[10px] font-bold text-blue-700";
 
                 cashArea.classList.add('hidden');
                 document.getElementById('uang_bayar').value = '';
@@ -383,7 +378,7 @@
                 html = `
                 <div class="h-full flex flex-col items-center justify-center text-gray-400">
                     <svg class="w-10 h-10 sm:w-12 sm:h-12 mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                    <p class="font-medium text-xs sm:text-sm">Keranjang masih kosong</p>
+                    <p class="font-medium text-[10px] sm:text-sm">Keranjang masih kosong</p>
                 </div>`;
             } else {
                 entries.forEach(item => {
@@ -392,9 +387,9 @@
                     html += `
                         <div class="flex flex-col bg-white border border-gray-100 p-2 sm:p-3 rounded-lg sm:rounded-xl shadow-sm">
                             <div class="flex justify-between items-start mb-1.5 sm:mb-2">
-                                <div class="flex-1 pr-2">
-                                    <p class="font-bold text-xs sm:text-sm text-gray-800 leading-tight">${item.nama}</p>
-                                    <p class="text-[10px] sm:text-xs text-primary font-bold mt-0.5">Rp ${item.harga.toLocaleString('id-ID')}</p>
+                                <div class="flex-1 pr-1">
+                                    <p class="font-bold text-[10px] sm:text-sm text-gray-800 leading-tight">${item.nama}</p>
+                                    <p class="text-[9px] sm:text-xs text-primary font-bold mt-0.5">Rp ${item.harga.toLocaleString('id-ID')}</p>
                                 </div>
                                 <div class="flex items-center gap-1.5 sm:gap-2 bg-gray-50 border border-gray-200 rounded-md sm:rounded-lg p-0.5">
                                     <button type="button" onclick="changeQty(${item.menu_id}, -1)" class="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center bg-white rounded shadow-sm text-gray-600 font-bold hover:text-red-500">-</button>
@@ -402,7 +397,7 @@
                                     <button type="button" onclick="changeQty(${item.menu_id}, 1)" class="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center bg-white rounded shadow-sm text-gray-600 font-bold hover:text-primary">+</button>
                                 </div>
                             </div>
-                            <input type="text" onchange="updateNote(${item.menu_id}, this.value)" value="${item.catatan}" placeholder="Catatan (cth: Es dipisah)..." class="w-full text-[10px] sm:text-xs bg-gray-50 border-transparent focus:border-gray-300 focus:ring-0 rounded p-1 sm:p-1.5 text-gray-600 placeholder-gray-400">
+                            <input type="text" onchange="updateNote(${item.menu_id}, this.value)" value="${item.catatan}" placeholder="Catatan (cth: Es dipisah)..." class="w-full text-[9px] sm:text-xs bg-gray-50 border-transparent focus:border-gray-300 focus:ring-0 rounded p-1 sm:p-1.5 text-gray-600 placeholder-gray-400">
                         </div>
                     `;
                 });
