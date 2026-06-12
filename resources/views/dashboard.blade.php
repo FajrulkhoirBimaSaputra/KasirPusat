@@ -215,75 +215,91 @@
             </div>
 
             {{-- AREA PRODUK TERJUAL --}}
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-2xl border border-gray-100">
-                <div
-                    class="p-6 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <h3 class="text-lg font-semibold text-gray-700">Laporan Produk Terjual</h3>
+            <div class="bg-white overflow-hidden shadow-sm rounded-xl sm:rounded-2xl border border-gray-100">
 
-                    <form method="GET" action="{{ route('dashboard') }}" class="flex items-center gap-2">
+                {{-- HEADER & FILTER SECTION --}}
+                <div
+                    class="p-4 sm:p-6 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <h3 class="text-base sm:text-lg font-bold text-gray-700">Laporan Produk Terjual</h3>
+
+                    <form method="GET" action="{{ route('dashboard') }}"
+                        class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                         <input type="hidden" name="period" value="{{ $currentPeriod }}">
 
-                        <label for="tanggal" class="text-sm font-medium text-gray-600 text-nowrap">Pilih
-                            Tanggal:</label>
-                        <input type="date" name="tanggal" id="tanggal" value="{{ $tanggalProduk }}"
-                            onchange="this.form.submit()"
-                            class="border-gray-300 rounded-xl shadow-sm focus:ring-primary focus:border-primary text-sm">
+                        <label for="tanggal" class="text-xs sm:text-sm font-bold text-gray-500 whitespace-nowrap">
+                            Pilih Tanggal:
+                        </label>
 
-                        @if ($tanggalProduk != \Carbon\Carbon::today()->format('Y-m-d'))
-                            <a href="{{ route('dashboard', ['period' => $currentPeriod]) }}"
-                                class="text-xs text-blue-600 hover:text-blue-800 underline">Reset</a>
-                        @endif
+                        <div class="flex items-center gap-2 flex-1 sm:flex-none">
+                            <input type="date" name="tanggal" id="tanggal" value="{{ $tanggalProduk }}"
+                                onchange="this.form.submit()"
+                                class="w-full sm:w-auto border-gray-200 rounded-lg shadow-sm focus:ring-primary focus:border-primary text-xs sm:text-sm px-3 py-1.5 sm:px-3 sm:py-2">
+
+                            @if ($tanggalProduk != \Carbon\Carbon::today()->format('Y-m-d'))
+                                <a href="{{ route('dashboard', ['period' => $currentPeriod]) }}"
+                                    class="text-[10px] sm:text-xs bg-red-50 text-red-600 border border-red-100 hover:bg-red-100 px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg font-bold transition-colors whitespace-nowrap">
+                                    Reset
+                                </a>
+                            @endif
+                        </div>
                     </form>
                 </div>
 
+                {{-- KONTEN TABEL --}}
                 <div class="p-0 sm:p-6">
                     @if ($produkTerjual->isEmpty())
-                        <div class="text-center py-12 text-gray-500">
-                            <svg class="w-16 h-16 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
+                        <div class="text-center py-10 sm:py-12 text-gray-500">
+                            <svg class="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-2 sm:mb-3 text-gray-300" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                     d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
                             </svg>
-                            <p>Tidak ada data penjualan untuk tanggal
-                                <strong>{{ \Carbon\Carbon::parse($tanggalProduk)->translatedFormat('d F Y') }}</strong>
+                            <p class="text-xs sm:text-base px-4">
+                                Tidak ada data penjualan untuk tanggal<br class="block sm:hidden">
+                                <strong
+                                    class="text-gray-700">{{ \Carbon\Carbon::parse($tanggalProduk)->translatedFormat('d F Y') }}</strong>
                             </p>
                         </div>
                     @else
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left">
+                        <div class="overflow-x-auto custom-scrollbar">
+                            <table class="w-full text-left border-collapse">
                                 <thead>
                                     <tr
-                                        class="bg-gray-50 border-y border-gray-100 text-xs uppercase text-gray-500 font-bold">
-                                        <th class="px-6 py-4 text-center w-20">Rank</th>
-                                        <th class="px-6 py-4">Menu</th>
-                                        <th class="px-6 py-4 text-center">Terjual</th>
-                                        <th class="px-6 py-4 text-right">Pendapatan</th>
+                                        class="bg-gray-50 border-y border-gray-100 text-[10px] sm:text-xs uppercase text-gray-500 font-bold tracking-wider">
+                                        <th class="px-2 py-2.5 sm:px-6 sm:py-4 text-center w-10 sm:w-20">Rank</th>
+                                        <th class="px-2 py-2.5 sm:px-6 sm:py-4 whitespace-nowrap">Menu</th>
+                                        <th class="px-2 py-2.5 sm:px-6 sm:py-4 text-center">Terjual</th>
+                                        <th class="px-3 py-2.5 sm:px-6 sm:py-4 text-right">Pendapatan</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-50">
                                     @foreach ($produkTerjual as $index => $item)
                                         <tr class="hover:bg-gray-50 transition-colors">
-                                            <td class="px-6 py-4 text-center">
+                                            <td class="px-2 py-3 sm:px-6 sm:py-4 text-center">
                                                 @if ($index == 0)
-                                                    <span class="text-xl">🥇</span>
+                                                    <span class="text-base sm:text-xl">🥇</span>
                                                 @elseif($index == 1)
-                                                    <span class="text-xl">🥈</span>
+                                                    <span class="text-base sm:text-xl">🥈</span>
                                                 @elseif($index == 2)
-                                                    <span class="text-xl">🥉</span>
+                                                    <span class="text-base sm:text-xl">🥉</span>
                                                 @else
-                                                    <span class="text-gray-400 font-medium">{{ $index + 1 }}</span>
+                                                    <span
+                                                        class="text-gray-400 font-black text-xs sm:text-base">{{ $index + 1 }}</span>
                                                 @endif
                                             </td>
-                                            <td class="px-6 py-4 font-bold text-gray-800">
+                                            <td
+                                                class="px-2 py-3 sm:px-6 sm:py-4 font-bold text-gray-800 text-[11px] sm:text-sm">
                                                 {{ $item->menu->nama ?? 'Menu Terhapus' }}
                                             </td>
-                                            <td class="px-6 py-4 text-center">
+                                            <td class="px-2 py-3 sm:px-6 sm:py-4 text-center">
+                                                {{-- Mengubah gaya badge porsi agar lebih manis --}}
                                                 <span
-                                                    class="bg-gray-100 px-3 py-1 rounded-full text-sm font-semibold text-gray-700">
+                                                    class="bg-blue-50 border border-blue-100 px-2 py-1 sm:px-3 sm:py-1 rounded-md sm:rounded-full text-[10px] sm:text-sm font-bold text-blue-700 whitespace-nowrap shadow-sm">
                                                     {{ $item->total_qty }} porsi
                                                 </span>
                                             </td>
-                                            <td class="px-6 py-4 text-right font-bold text-primary">
+                                            <td
+                                                class="px-3 py-3 sm:px-6 sm:py-4 text-right font-black text-primary text-[11px] sm:text-base whitespace-nowrap">
                                                 Rp {{ number_format($item->total_pendapatan, 0, ',', '.') }}
                                             </td>
                                         </tr>
