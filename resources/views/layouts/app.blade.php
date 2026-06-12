@@ -21,7 +21,7 @@
 
         @include('layouts.sidebar')
 
-        <div class="flex-1 flex flex-col transition-all duration-300 ease-in-out relative"
+        <div class="flex-1 flex flex-col transition-all duration-300 ease-in-out relative min-w-0 w-full overflow-x-hidden"
             :class="sidebarOpen ? 'sm:ml-64' : 'sm:ml-16'">
 
             <header
