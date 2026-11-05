@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Auth;
+
 class RoleMiddleware
 {
     /**
@@ -13,10 +14,11 @@ class RoleMiddleware
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle($request, Closure $next, $role)
+    public function handle(Request $request, Closure $next, ...$roles)
     {
-        if (! Auth::check() || Auth::user()->role !== $role) {
-            abort(403);
+        // Cek apakah user belum login, atau role-nya TIDAK ADA di dalam daftar role yang diizinkan
+        if (! Auth::check() || ! in_array(Auth::user()->role, $roles)) {
+            abort(403, 'Akses Ditolak! Anda tidak memiliki izin untuk halaman ini.');
         }
 
         return $next($request);

@@ -6,10 +6,10 @@ use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\MenuManagementController;
 use App\Http\Controllers\Admin\ShiftController;
 use App\Http\Controllers\KasirController;
-use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\IngredientController;
 use App\Http\Controllers\Admin\LaporanController;
+use App\Http\Controllers\Owner\DashboardController as OwnerDashboardController;
 
 
 
@@ -38,6 +38,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/laporan/bulanan', [LaporanController::class, 'bulanan'])->name('laporan.bulanan');
         Route::get('/admin/laporan/bulanan/export', [LaporanController::class, 'exportExcel'])->name('laporan.bulanan.export');
         Route::resource('admin/stok', IngredientController::class)->names('admin.stok');
+    });
+
+    // ROUTE KHUSUS OWNER
+    Route::middleware('role:owner')->prefix('owner')->name('owner.')->group(function () {
+        Route::get('/dashboard', [OwnerDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/stok-history', [OwnerDashboardController::class, 'stokHistory'])->name('stok-history');
     });
 
     // PROFILE

@@ -47,6 +47,7 @@
                     class="block w-full bg-gray-50 border-gray-200 focus:bg-white focus:border-primary focus:ring-primary/20 rounded-xl shadow-sm transition duration-200 text-gray-700">
                     <option value="kasir">Kasir</option>
                     <option value="admin">Admin</option>
+                    <option value="owner">Owner</option>
                 </select>
                 <x-input-error :messages="$errors->get('role')" class="mt-2" />
             </div>
