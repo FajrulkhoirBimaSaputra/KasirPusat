@@ -87,6 +87,30 @@ class KasirController extends Controller
                     'subtotal' => $item['harga'] * $item['qty'],
                     'catatan' => $item['catatan'] ?? null // Menyimpan catatan per item
                 ]);
+
+                $menu = Menu::with('ingredient')->find($item['menu_id']);
+
+                // Cek apakah menu memiliki relasi ke ingredient (stok)
+                if ($menu && $menu->ingredient) {
+                    $ingredient = $menu->ingredient;
+                    $oldStok = $ingredient->stok;
+                    $qtyBeli = $item['qty'];
+                    
+                    // Kurangi stok fisik
+                    $ingredient->stok -= $qtyBeli;
+                    $ingredient->last_updated_by = Auth::id();
+                    $ingredient->save();
+
+                    // Catat mutasi agar tampil di Dashboard Owner
+                    IngredientHistory::create([
+                        'ingredient_id' => $ingredient->id,
+                        'user_id'       => Auth::id(),
+                        'old_stok'      => $oldStok,
+                        'new_stok'      => $ingredient->stok,
+                        'difference'    => -$qtyBeli,
+                        'keterangan'    => "Terjual via POS (Struk #" . $order->id . ")"
+                    ]);
+                }
             }
 
             // --- INTEGRASI MIDTRANS ---

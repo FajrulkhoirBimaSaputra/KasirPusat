@@ -1,255 +1,332 @@
 <x-app-layout>
   <x-slot name="header">
-    <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-      {{ __('Dashboard Eksekutif Owner') }}
+    <h2 class="font-bold text-xl text-gray-800 leading-tight">
+      Dashboard Eksekutif Owner
     </h2>
   </x-slot>
 
-  <div class="py-12">
-    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+  <div class="py-12 max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
-      {{-- HEADER: FILTER (Tombol Log Stok Dihapus) --}}
-      <div
-        class="flex flex-col lg:flex-row lg:items-center gap-4 bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-        <form method="GET" action="{{ route('owner.dashboard') }}" class="flex flex-wrap items-center gap-3">
-          <div class="flex items-center gap-2">
-            <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Dari:</label>
-            <input type="date" name="start_date" value="{{ $startDate->format('Y-m-d') }}"
-              class="border-gray-200 rounded-xl shadow-sm focus:ring-primary focus:border-primary text-sm px-3 py-2">
+    {{-- FILTER TANGGAL --}}
+    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+      <form method="GET" action="{{ route('owner.dashboard') }}" class="flex flex-wrap items-center gap-4">
+        <div class="flex items-center gap-2">
+          <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Dari:</label>
+          <input type="date" name="start_date" value="{{ $startDate->format('Y-m-d') }}"
+            class="border-gray-200 rounded-xl shadow-sm focus:ring-primary focus:border-primary text-sm px-3 py-2">
+        </div>
+        <div class="flex items-center gap-2">
+          <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Sampai:</label>
+          <input type="date" name="end_date" value="{{ $endDate->format('Y-m-d') }}"
+            class="border-gray-200 rounded-xl shadow-sm focus:ring-primary focus:border-primary text-sm px-3 py-2">
+        </div>
+        <button type="submit"
+          class="px-6 py-2 bg-gray-800 hover:bg-gray-700 text-white text-sm font-bold rounded-xl shadow-sm transition-colors">
+          Terapkan Filter
+        </button>
+        @if ($startDate->format('Y-m-d') != \Carbon\Carbon::now()->startOfMonth()->format('Y-m-d'))
+          <a href="{{ route('owner.dashboard') }}"
+            class="text-xs text-red-500 hover:text-red-700 underline font-medium">Reset ke Bulan Ini</a>
+        @endif
+      </form>
+    </div>
+
+    {{-- KARTU KEUANGAN MENDETAIL --}}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {{-- Kartu Pemasukan --}}
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 border-l-4 border-l-emerald-500">
+        <div class="flex justify-between items-start">
+          <div>
+            <p class="text-sm font-bold text-gray-500 uppercase tracking-wider">Total Pemasukan</p>
+            <h3 class="text-3xl font-black text-emerald-600 mt-1">Rp {{ number_format($totalPemasukan, 0, ',', '.') }}
+            </h3>
           </div>
-          <div class="flex items-center gap-2">
-            <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Sampai:</label>
-            <input type="date" name="end_date" value="{{ $endDate->format('Y-m-d') }}"
-              class="border-gray-200 rounded-xl shadow-sm focus:ring-primary focus:border-primary text-sm px-3 py-2">
-          </div>
-          <button type="submit"
-            class="px-5 py-2 bg-gray-800 hover:bg-gray-700 text-white text-sm font-bold rounded-xl shadow-sm transition-colors">
-            Terapkan Filter
-          </button>
-
-          @if (
-              $startDate->format('Y-m-d') != \Carbon\Carbon::now()->startOfMonth()->format('Y-m-d') ||
-                  $endDate->format('Y-m-d') != \Carbon\Carbon::now()->endOfDay()->format('Y-m-d'))
-            <a href="{{ route('owner.dashboard') }}"
-              class="text-xs text-red-500 hover:text-red-700 underline font-medium px-2">
-              Reset ke Bulan Ini
-            </a>
-          @endif
-        </form>
-      </div>
-
-      {{-- KOTAK RINGKASAN KEUANGAN & STOK --}}
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {{-- Laporan Keuangan (POS + Kas) --}}
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden">
-          <div class="absolute top-0 right-0 p-4 opacity-10">
-            <svg class="w-16 h-16 text-emerald-500" fill="currentColor" viewBox="0 0 24 24">
-              <path
-                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.31-8.86c-1.77-.45-2.34-.94-2.34-1.67 0-.84.79-1.43 2.1-1.43 1.38 0 1.9.66 1.94 1.64h1.71c-.05-1.34-.87-2.57-2.49-2.97V5H10.9v1.69c-1.51.32-2.72 1.3-2.72 2.81 0 1.79 1.49 2.69 3.66 3.21 1.95.46 2.34 1.15 2.34 1.87 0 .53-.39 1.64-2.25 1.64-1.74 0-2.1-.96-2.17-1.92H8c.11 1.71 1.35 2.85 2.9 3.22V19h2.34v-1.68c1.65-.27 2.88-1.28 2.88-2.91 0-2.23-1.89-2.92-3.81-3.27z" />
+          <div class="p-3 bg-emerald-50 rounded-xl text-emerald-500">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
             </svg>
           </div>
-          <p class="text-gray-500 text-sm font-medium">Pendapatan Transaksi POS</p>
-          <h3 class="text-2xl font-black text-gray-800 mt-1">
-            Rp {{ number_format($totalPendapatanPOS, 0, ',', '.') }}
-          </h3>
-
-          {{-- Breakdown Histori Kas --}}
-          <div class="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
-            <div>
-              <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Kas Masuk</p>
-              <p class="text-xs font-black text-emerald-600 mt-0.5">+ Rp {{ number_format($uangMasukKas, 0, ',', '.') }}
-              </p>
-            </div>
-            <div class="text-right">
-              <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Kas Keluar</p>
-              <p class="text-xs font-black text-red-600 mt-0.5">- Rp {{ number_format($uangKeluarKas, 0, ',', '.') }}
-              </p>
-            </div>
+        </div>
+        <div class="mt-4 pt-4 border-t border-gray-100 grid grid-cols-2 gap-4">
+          <div>
+            <p class="text-[10px] font-bold text-gray-400 uppercase">Dari Transaksi Kasir (POS)</p>
+            <p class="text-sm font-bold text-gray-800">Rp {{ number_format($totalPendapatanPOS, 0, ',', '.') }}</p>
+          </div>
+          <div>
+            <p class="text-[10px] font-bold text-gray-400 uppercase">Dari Kas Masuk Ekstra</p>
+            <p class="text-sm font-bold text-gray-800">Rp {{ number_format($uangMasukKas, 0, ',', '.') }}</p>
           </div>
         </div>
+      </div>
 
-        {{-- Total Transaksi --}}
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden">
-          <div class="absolute top-0 right-0 p-4 opacity-10">
-            <svg class="w-16 h-16 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
-              <path
-                d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+      {{-- Kartu Pengeluaran & Laba --}}
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 border-l-4 border-l-red-500">
+        <div class="flex justify-between items-start">
+          <div>
+            <p class="text-sm font-bold text-gray-500 uppercase tracking-wider">Total Pengeluaran Kas</p>
+            <h3 class="text-3xl font-black text-red-600 mt-1">Rp {{ number_format($totalPengeluaran, 0, ',', '.') }}
+            </h3>
+          </div>
+          <div class="p-3 bg-red-50 rounded-xl text-red-500">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
             </svg>
           </div>
-          <p class="text-gray-500 text-sm font-medium">Total Transaksi Lunas</p>
-          <h3 class="text-2xl font-black text-gray-800 mt-1">
-            {{ number_format($totalTransaksi, 0, ',', '.') }} <span
-              class="text-sm font-medium text-gray-400">struk</span>
-          </h3>
-          <p class="text-[10px] text-gray-400 mt-2 font-medium">Rerata Nilai Struk: Rp
-            {{ $totalTransaksi > 0 ? number_format($totalPendapatanPOS / $totalTransaksi, 0, ',', '.') : 0 }}</p>
         </div>
-
-        {{-- Status Stok Kritis --}}
-        <div
-          class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden {{ $stokKritis->count() > 0 ? 'border-red-200 bg-red-50/30' : '' }}">
-          <p class="text-gray-500 text-sm font-medium">Peringatan Stok Kritis</p>
-          <div class="flex items-center gap-3 mt-1">
-            <h3 class="text-2xl font-black {{ $stokKritis->count() > 0 ? 'text-red-600' : 'text-gray-800' }}">
-              {{ $stokKritis->count() }} <span class="text-sm font-medium text-gray-400">item</span>
-            </h3>
-
-            @if ($stokKritis->count() > 0)
-              <span
-                class="flex items-center gap-1.5 text-[10px] font-bold text-red-600 bg-red-100 px-2.5 py-1 rounded-full border border-red-200">
-                <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span> Butuh Restock
-              </span>
-            @else
-              <span
-                class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100">
-                Aman
-              </span>
-            @endif
-          </div>
-          <p class="text-[10px] text-gray-400 mt-2 font-medium">Bahan/Menu dengan stok fisik &le; 10</p>
+        <div class="mt-4 pt-4 border-t border-gray-100">
+          <p class="text-[10px] font-bold text-gray-400 uppercase">Estimasi Arus Kas Bersih (Pemasukan - Pengeluaran)
+          </p>
+          <p
+            class="text-lg font-black {{ $totalPemasukan - $totalPengeluaran >= 0 ? 'text-emerald-600' : 'text-red-600' }}">
+            Rp {{ number_format($totalPemasukan - $totalPengeluaran, 0, ',', '.') }}
+          </p>
         </div>
       </div>
+    </div>
 
-      {{-- AREA ANALITIK PRODUK --}}
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {{-- Top 5 Terlaris --}}
-        <div class="bg-white overflow-hidden shadow-sm rounded-2xl border border-gray-100 flex flex-col">
-          <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-            <h3 class="text-sm font-bold text-emerald-600 uppercase tracking-wider flex items-center gap-2">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-              </svg>
-              Top 5 Menu Laris
-            </h3>
-          </div>
-          <div class="p-0 flex-1">
-            <div class="overflow-x-auto custom-scrollbar">
-              <table class="w-full text-left border-collapse">
-                <tbody class="divide-y divide-gray-50">
-                  @forelse($itemLaris as $index => $item)
-                    <tr class="hover:bg-gray-50 transition-colors">
-                      <td class="px-5 py-4 w-12 text-center">
-                        @if ($index == 0)
-                          <span class="text-xl">🥇</span>
-                        @elseif($index == 1)
-                          <span class="text-xl">🥈</span>
-                        @elseif($index == 2)
-                          <span class="text-xl">🥉</span>
-                        @else
-                          <span class="text-gray-400 font-black text-sm">{{ $index + 1 }}</span>
-                        @endif
-                      </td>
-                      <td class="px-5 py-4 font-bold text-gray-800 text-sm">{{ $item->nama }}</td>
-                      <td class="px-5 py-4 text-right">
-                        <span
-                          class="bg-emerald-50 border border-emerald-100 px-3 py-1 rounded-full text-xs font-bold text-emerald-700 whitespace-nowrap">
-                          {{ $item->total_terjual }} porsi
-                        </span>
-                      </td>
-                    </tr>
-                  @empty
-                    <tr>
-                      <td colspan="3" class="px-6 py-12 text-center text-gray-400 text-sm font-medium">Belum ada menu
-                        yang laku di periode ini.</td>
-                    </tr>
-                  @endforelse
-                </tbody>
-              </table>
-            </div>
-          </div>
+    {{-- GRID 2 KOLOM: TOP MENU & BOTTOM MENU --}}
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {{-- Top Menu --}}
+      <div class="bg-white shadow-sm rounded-2xl border border-gray-100">
+        <div class="p-4 border-b border-gray-100 bg-gray-50">
+          <h3 class="text-sm font-bold text-emerald-600 uppercase tracking-wider">Top 5 Menu Laris</h3>
         </div>
-
-        {{-- Bottom 5 Kurang Laku --}}
-        <div class="bg-white overflow-hidden shadow-sm rounded-2xl border border-gray-100 flex flex-col">
-          <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-            <h3 class="text-sm font-bold text-red-500 uppercase tracking-wider flex items-center gap-2">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path>
-              </svg>
-              5 Menu Paling Sepi
-            </h3>
-          </div>
-          <div class="p-0 flex-1">
-            <div class="overflow-x-auto custom-scrollbar">
-              <table class="w-full text-left border-collapse">
-                <tbody class="divide-y divide-gray-50">
-                  @foreach ($itemTidakLaris as $index => $item)
-                    <tr class="hover:bg-gray-50 transition-colors">
-                      <td class="px-5 py-4 w-12 text-center text-gray-400 font-black text-sm">{{ $index + 1 }}</td>
-                      <td class="px-5 py-4 font-bold text-gray-800 text-sm">{{ $item->nama }}</td>
-                      <td class="px-5 py-4 text-right">
-                        @if ($item->total_terjual == 0)
-                          <span
-                            class="bg-red-50 border border-red-100 px-3 py-1 rounded-full text-xs font-bold text-red-600 whitespace-nowrap">0
-                            porsi</span>
-                        @else
-                          <span
-                            class="bg-gray-100 border border-gray-200 px-3 py-1 rounded-full text-xs font-bold text-gray-600 whitespace-nowrap">{{ $item->total_terjual }}
-                            porsi</span>
-                        @endif
-                      </td>
-                    </tr>
-                  @endforeach
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {{-- 4. AREA HISTORI STOK TERKINI (BAGIAN BARU DI BAWAH) --}}
-      <div class="bg-white overflow-hidden shadow-sm rounded-2xl border border-gray-100">
-        <div class="p-5 border-b border-gray-100 bg-gray-50 flex items-center gap-2">
-          <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
-            </path>
-          </svg>
-          <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wider">Histori Mutasi Stok Terkini</h3>
-        </div>
-        <div class="p-0">
-          <div class="overflow-x-auto custom-scrollbar">
-            <table class="w-full text-left text-sm border-collapse">
-              <thead>
-                <tr
-                  class="bg-gray-50/50 border-b border-gray-100 text-xs uppercase text-gray-400 font-bold tracking-wider">
-                  <th class="px-6 py-3">Waktu</th>
-                  <th class="px-6 py-3">Bahan / Item</th>
-                  <th class="px-6 py-3 text-center">Mutasi</th>
-                  <th class="px-6 py-3">Keterangan</th>
-                  <th class="px-6 py-3">Pelaku</th>
+        <div class="overflow-x-auto custom-scrollbar">
+          <table class="w-full text-left text-sm">
+            <tbody class="divide-y divide-gray-50">
+              @forelse($itemLaris as $index => $item)
+                <tr class="hover:bg-gray-50">
+                  <td class="px-5 py-3 w-10 text-center font-black text-gray-400">{{ $index + 1 }}</td>
+                  <td class="px-5 py-3 font-bold text-gray-800">{{ $item->nama }}</td>
+                  <td class="px-5 py-3 text-right"><span
+                      class="bg-emerald-50 text-emerald-700 px-2 py-1 rounded text-xs font-bold">{{ $item->total_terjual }}
+                      porsi</span></td>
                 </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-50">
-                @forelse($histories as $history)
-                  <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-3 text-gray-500 whitespace-nowrap">
-                      {{ $history->created_at->format('d M Y, H:i') }}</td>
-                    <td class="px-6 py-3 font-bold text-gray-800">{{ $history->ingredient->nama ?? 'Bahan Terhapus' }}
-                    </td>
-                    <td class="px-6 py-3 text-center font-bold">
-                      @if ($history->jumlah > 0)
-                        <span
-                          class="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">+{{ $history->jumlah }}</span>
-                      @else
-                        <span class="text-red-600 bg-red-50 px-2 py-0.5 rounded">{{ $history->jumlah }}</span>
-                      @endif
-                    </td>
-                    <td class="px-6 py-3 text-gray-500 text-xs">{{ $history->keterangan ?? '-' }}</td>
-                    <td class="px-6 py-3 text-gray-700 font-medium">{{ $history->user->name ?? 'Sistem' }}</td>
-                  </tr>
-                @empty
-                  <tr>
-                    <td colspan="5" class="px-6 py-8 text-center text-gray-400 font-medium">Belum ada catatan
-                      mutasi stok.</td>
-                  </tr>
-                @endforelse
-              </tbody>
-            </table>
-          </div>
+              @empty
+                <tr>
+                  <td colspan="3" class="px-5 py-6 text-center text-gray-400">Data belum tersedia.</td>
+                </tr>
+              @endforelse
+            </tbody>
+          </table>
         </div>
+      </div>
+      {{-- Bottom Menu --}}
+      <div class="bg-white shadow-sm rounded-2xl border border-gray-100">
+        <div class="p-4 border-b border-gray-100 bg-gray-50">
+          <h3 class="text-sm font-bold text-red-500 uppercase tracking-wider">5 Menu Kurang Laku</h3>
+        </div>
+        <div class="overflow-x-auto custom-scrollbar">
+          <table class="w-full text-left text-sm">
+            <tbody class="divide-y divide-gray-50">
+              @foreach ($itemTidakLaris as $index => $item)
+                <tr class="hover:bg-gray-50">
+                  <td class="px-5 py-3 w-10 text-center font-black text-gray-400">{{ $index + 1 }}</td>
+                  <td class="px-5 py-3 font-bold text-gray-800">{{ $item->nama }}</td>
+                  <td class="px-5 py-3 text-right"><span
+                      class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs font-bold">{{ $item->total_terjual }}
+                      porsi</span></td>
+                </tr>
+              @endforeach
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    {{-- TABEL 1: RIWAYAT TRANSAKSI HARIAN --}}
+    <div class="bg-white overflow-hidden shadow-sm rounded-2xl border border-gray-100">
+      <div class="p-5 border-b border-gray-100 bg-gray-50">
+        <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wider">Riwayat Transaksi (Pemasukan & Pengeluaran
+          Harian)</h3>
+      </div>
+      <div class="overflow-x-auto custom-scrollbar">
+        <table class="w-full text-left text-sm border-collapse">
+          <thead>
+            <tr class="bg-gray-50 border-b border-gray-100 text-xs uppercase text-gray-500 font-bold">
+              <th class="px-6 py-4">Tanggal</th>
+              <th class="px-6 py-4 text-right">Penjualan POS</th>
+              <th class="px-6 py-4 text-right">Kas Masuk Ekstra</th>
+              <th class="px-6 py-4 text-right text-red-600">Total Pengeluaran</th>
+              <th class="px-6 py-4 text-right">Arus Bersih</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-50">
+            @forelse($riwayatHarianPaginated as $row)
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-6 py-4 font-bold text-gray-800">
+                  {{ \Carbon\Carbon::parse($row['tanggal'])->translatedFormat('d F Y') }}</td>
+                <td class="px-6 py-4 text-right text-emerald-600 font-medium">Rp
+                  {{ number_format($row['pemasukan_pos'], 0, ',', '.') }}</td>
+                <td class="px-6 py-4 text-right text-emerald-600 font-medium">Rp
+                  {{ number_format($row['pemasukan_kas'], 0, ',', '.') }}</td>
+                <td class="px-6 py-4 text-right text-red-600 font-bold">Rp
+                  {{ number_format($row['total_pengeluaran'], 0, ',', '.') }}</td>
+                <td
+                  class="px-6 py-4 text-right font-black {{ $row['laba_bersih'] >= 0 ? 'text-gray-800' : 'text-red-600' }}">
+                  Rp {{ number_format($row['laba_bersih'], 0, ',', '.') }}
+                </td>
+              </tr>
+            @empty
+              <tr>
+                <td colspan="5" class="px-6 py-8 text-center text-gray-500">Tidak ada riwayat transaksi pada rentang
+                  tanggal ini.</td>
+              </tr>
+            @endforelse
+          </tbody>
+        </table>
+      </div>
+      {{-- Pagination Riwayat --}}
+      @if ($riwayatHarianPaginated->hasPages())
+        <div class="p-4 border-t border-gray-100 bg-gray-50/50">
+          {{ $riwayatHarianPaginated->links() }}
+        </div>
+      @endif
+    </div>
+
+    {{-- GRID 2 KOLOM: TABEL STOK & TABEL MUTASI --}}
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+      {{-- TABEL 2: STOK MAKANAN --}}
+      <div class="bg-white shadow-sm rounded-2xl border border-gray-100 flex flex-col">
+        <div class="p-5 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+          <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wider">Ketersediaan Stok Makanan</h3>
+        </div>
+        <div class="overflow-x-auto custom-scrollbar flex-1">
+          <table class="w-full text-left text-sm border-collapse">
+            <thead class="sticky top-0 bg-white shadow-sm">
+              <tr class="border-b border-gray-100 text-xs uppercase text-gray-500 font-bold">
+                <th class="px-5 py-3">Nama Makanan (Bahan)</th>
+                <th class="px-5 py-3 text-right">Sisa Stok</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+              @forelse($stokMakanan as $stok)
+                <tr class="hover:bg-gray-50">
+                  <td class="px-5 py-3 font-bold text-gray-800">{{ $stok->nama }}</td>
+                  <td class="px-5 py-3 text-right">
+                    @if ($stok->stok <= 10)
+                      <span
+                        class="bg-red-100 text-red-700 px-2.5 py-1 rounded-full text-xs font-bold border border-red-200 animate-pulse">Sisa
+                        {{ $stok->stok }} (Kritis)</span>
+                    @else
+                      <span
+                        class="bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full text-xs font-bold">{{ $stok->stok }}</span>
+                    @endif
+                  </td>
+                </tr>
+              @empty
+                <tr>
+                  <td colspan="2" class="px-5 py-6 text-center text-gray-400">Data stok makanan kosong.</td>
+                </tr>
+              @endforelse
+            </tbody>
+          </table>
+        </div>
+        {{-- Pagination Stok --}}
+        @if ($stokMakanan->hasPages())
+          <div class="p-4 border-t border-gray-100 bg-gray-50/50">
+            {{ $stokMakanan->links() }}
+          </div>
+        @endif
+      </div>
+
+      {{-- TABEL 3: LOG MUTASI STOK --}}
+      <div class="bg-white shadow-sm rounded-2xl border border-gray-100 flex flex-col">
+        <div class="p-5 border-b border-gray-100 bg-gray-50">
+          <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wider">Log Mutasi Stok Terakhir</h3>
+        </div>
+        <div class="overflow-x-auto custom-scrollbar flex-1">
+          <table class="w-full text-left text-sm border-collapse">
+            <thead class="sticky top-0 bg-white shadow-sm z-10">
+              <tr class="border-b border-gray-100 text-[10px] uppercase text-gray-400 font-black tracking-wider">
+                <th class="px-5 py-4">Bahan / Makanan</th>
+                <th class="px-5 py-4 text-center">Total Mutasi</th>
+                <th class="px-5 py-4 text-left">Diubah Oleh</th>
+                <th class="px-5 py-4 text-right">Waktu</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50/80">
+              @forelse($histories as $history)
+                <tr class="hover:bg-gray-50/80 transition-colors duration-200 group">
+
+                  {{-- Kolom Nama Bahan & Info Stok (Awal -> Akhir) --}}
+                  <td class="px-5 py-3.5">
+                    <p class="font-bold text-gray-800 group-hover:text-primary transition-colors">
+                      {{ $history->ingredient->nama ?? 'Dihapus' }}
+                    </p>
+                    <div class="flex items-center gap-1.5 mt-0.5 text-[10px] font-medium text-gray-400">
+                      <span>Stok: <b class="text-gray-500">{{ $history->old_stok }}</b></span>
+                      <svg class="w-3 h-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                      </svg>
+                      <b class="text-gray-900">{{ $history->new_stok }}</b>
+                    </div>
+                  </td>
+
+                  {{-- Kolom Badge Mutasi (+/-) --}}
+                  <td class="px-5 py-3.5 text-center">
+                    @if ($history->difference > 0)
+                      <span
+                        class="inline-flex items-center justify-center min-w-[3rem] text-emerald-700 bg-emerald-50 border border-emerald-100 px-2 py-1 rounded-md text-xs font-black shadow-sm">
+                        +{{ $history->difference }}
+                      </span>
+                    @elseif ($history->difference < 0)
+                      <span
+                        class="inline-flex items-center justify-center min-w-[3rem] text-red-700 bg-red-50 border border-red-100 px-2 py-1 rounded-md text-xs font-black shadow-sm">
+                        {{ $history->difference }}
+                      </span>
+                    @else
+                      <span
+                        class="inline-flex items-center justify-center min-w-[3rem] text-gray-700 bg-gray-50 border border-gray-200 px-2 py-1 rounded-md text-xs font-black shadow-sm">
+                        0
+                      </span>
+                    @endif
+                  </td>
+
+                  {{-- Kolom User dengan Avatar Initial --}}
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-2.5">
+                      <span
+                        class="text-xs font-bold text-gray-700">{{ $history->user->name ?? 'Tidak Diketahui' }}</span>
+                    </div>
+                  </td>
+
+                  {{-- Kolom Tanggal & Jam (Aktivitas Terakhir di Hari Itu) --}}
+                  <td class="px-5 py-3.5 text-right">
+                    <p class="text-xs font-bold text-gray-600">
+                      {{ \Carbon\Carbon::parse($history->tanggal)->translatedFormat('d M Y') }}</p>
+                    <p class="text-[10px] font-semibold text-gray-400 mt-0.5">
+                      {{ \Carbon\Carbon::parse($history->created_at)->format('H:i') }} WIB</p>
+                  </td>
+
+                </tr>
+              @empty
+                {{-- Empty State --}}
+                <tr>
+                  <td colspan="4" class="px-5 py-12 text-center">
+                    <div class="flex flex-col items-center justify-center text-gray-400">
+                      <svg class="w-10 h-10 mb-3 text-gray-300" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4">
+                        </path>
+                      </svg>
+                      <p class="text-sm font-medium">Belum ada mutasi stok.</p>
+                    </div>
+                  </td>
+                </tr>
+              @endforelse
+            </tbody>
+          </table>
+        </div>
+        {{-- Pagination Mutasi --}}
+        @if ($histories->hasPages())
+          <div class="p-4 border-t border-gray-100 bg-gray-50/50">
+            {{ $histories->links() }}
+          </div>
+        @endif
       </div>
 
     </div>

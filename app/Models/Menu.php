@@ -11,5 +11,11 @@ class Menu extends Model
         'nama',
         'harga',
         'image_path',
+        'ingredient_id'
     ];
+
+    public function ingredient()
+    {
+        return $this->belongsTo(Ingredient::class);
+    }
 }

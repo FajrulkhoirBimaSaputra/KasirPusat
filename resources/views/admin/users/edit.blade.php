@@ -69,6 +69,7 @@
                     class="block w-full bg-gray-50 border-gray-200 focus:bg-white focus:border-primary focus:ring focus:ring-primary/20 rounded-xl transition duration-200 text-gray-700">
                     <option value="kasir" @selected(old('role', $user->role) === 'kasir')>Kasir</option>
                     <option value="admin" @selected(old('role', $user->role) === 'admin')>Admin</option>
+                    <option value="owner" @selected(old('role', $user->role) === 'owner')>Owner</option>
                 </select>
             </div>
 
